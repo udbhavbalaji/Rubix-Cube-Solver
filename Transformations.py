@@ -4,7 +4,9 @@ from Constraints import Axes, FacePositions
 class GridTransformations: 
     
     class UpAndDown:
-        ### GRID TRANSFORMATIONS FOR ROTATION UP & DOWN
+        
+        # * GRID TRANSFORMATIONS FOR UP & DOWN ROTATIONS
+        
         def transform_left_face(current_front, is_rotate_down=True):
             left_face = current_front.left
             old_face = left_face.copy()
@@ -108,6 +110,8 @@ class GridTransformations:
         
     
     class LeftAndRight:
+        
+        # * GRID TRANSFORMATIONS FOR LEFT & RIGHT ROTATIONS
         
         def transform_left_face(current_front, axis, is_left=True):
             left_face = current_front.left
@@ -260,13 +264,126 @@ class GridTransformations:
         
     class Inversion:
         
-        pass
+        # * GRID TRANSFORMATIONS FOR CUBE INVERSION
+        
+        def transform_left_face(current_front, axis):
+            left_face = current_front.left
+            old_face = left_face.copy()
+            
+            old_top_row = old_face.grid[FacePositions.TOP_ROW].copy()
+            old_bottom_row = old_face.grid[FacePositions.BOTTOM_ROW].copy()
+            old_left_col = old_face.grid[:,FacePositions.LEFT_COL].copy()
+            old_right_col = old_face.grid[:,FacePositions.RIGHT_COL].copy()
+            
+            if axis == Axes.HORIZONTAL:
+                left_face.grid[:,FacePositions.RIGHT_COL] = np.flip(old_left_col)
+                left_face.grid[:,FacePositions.LEFT_COL] = np.flip(old_right_col)
+                left_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
+                left_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
+            
+            return left_face.grid
+        
+        def transform_right_face(current_front, axis):
+            right_face = current_front.right
+            old_face = right_face.copy()
+            
+            old_top_row = old_face.grid[FacePositions.TOP_ROW].copy()
+            old_bottom_row = old_face.grid[FacePositions.BOTTOM_ROW].copy()
+            old_left_col = old_face.grid[:,FacePositions.LEFT_COL].copy()
+            old_right_col = old_face.grid[:,FacePositions.RIGHT_COL].copy()
+            
+            if axis == Axes.HORIZONTAL:
+                right_face.grid[:,FacePositions.RIGHT_COL] = np.flip(old_left_col)
+                right_face.grid[:,FacePositions.LEFT_COL] = np.flip(old_right_col)
+                right_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
+                right_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
+        
+            return right_face.grid
+        
+        def transform_top_face(current_front, axis):
+            top_face = current_front.top
+            old_face = top_face.copy()
+            
+            old_top_row = old_face.grid[FacePositions.TOP_ROW].copy()
+            old_bottom_row = old_face.grid[FacePositions.BOTTOM_ROW].copy()
+            old_left_col = old_face.grid[:,FacePositions.LEFT_COL].copy()
+            old_right_col = old_face.grid[:,FacePositions.RIGHT_COL].copy()
+            
+            if axis == Axes.VERTICAL:
+                top_face.grid[:,FacePositions.RIGHT_COL] = np.flip(old_left_col)
+                top_face.grid[:,FacePositions.LEFT_COL] = np.flip(old_right_col)
+                top_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
+                top_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
+            else:
+                top_face.grid[:,FacePositions.RIGHT_COL] = np.flip(old_left_col)
+                top_face.grid[:,FacePositions.LEFT_COL] = np.flip(old_right_col)
+                top_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
+                top_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
+                
+            return top_face.grid
+                
+        def transform_bottom_face(current_front, axis):
+            bottom_face = current_front.bottom
+            old_face = bottom_face.copy()
+            
+            old_top_row = old_face.grid[FacePositions.TOP_ROW].copy()
+            old_bottom_row = old_face.grid[FacePositions.BOTTOM_ROW].copy()
+            old_left_col = old_face.grid[:,FacePositions.LEFT_COL].copy()
+            old_right_col = old_face.grid[:,FacePositions.RIGHT_COL].copy()
+            
+            if axis == Axes.VERTICAL:
+                bottom_face.grid[:,FacePositions.RIGHT_COL] = np.flip(old_left_col)
+                bottom_face.grid[:,FacePositions.LEFT_COL] = np.flip(old_right_col)
+                bottom_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
+                bottom_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
+            else:
+                bottom_face.grid[:,FacePositions.RIGHT_COL] = np.flip(old_left_col)
+                bottom_face.grid[:,FacePositions.LEFT_COL] = np.flip(old_right_col)
+                bottom_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
+                bottom_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
+            
+            return bottom_face.grid
+        
+        def transform_front_face(current_front, axis):
+            front_face = current_front
+            old_face = front_face.copy()
+            
+            old_top_row = old_face.grid[FacePositions.TOP_ROW].copy()
+            old_bottom_row = old_face.grid[FacePositions.BOTTOM_ROW].copy()
+            old_left_col = old_face.grid[:,FacePositions.LEFT_COL].copy()
+            old_right_col = old_face.grid[:,FacePositions.RIGHT_COL].copy()
+            
+            if axis == Axes.HORIZONTAL:
+                front_face.grid[:,FacePositions.RIGHT_COL] = np.flip(old_left_col)
+                front_face.grid[:,FacePositions.LEFT_COL] = np.flip(old_right_col)
+                front_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
+                front_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
+            
+            return front_face.grid
+        
+        def transform_back_face(current_front, axis):
+            back_face = current_front.opposite
+            old_face = back_face.copy()
+            
+            old_top_row = old_face.grid[FacePositions.TOP_ROW].copy()
+            old_bottom_row = old_face.grid[FacePositions.BOTTOM_ROW].copy()
+            old_left_col = old_face.grid[:,FacePositions.LEFT_COL].copy()
+            old_right_col = old_face.grid[:,FacePositions.RIGHT_COL].copy()
+            
+            if axis == Axes.HORIZONTAL:
+                back_face.grid[:,FacePositions.RIGHT_COL] = np.flip(old_left_col)
+                back_face.grid[:,FacePositions.LEFT_COL] = np.flip(old_right_col)
+                back_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
+                back_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
+                
+            return back_face.grid
         
         
 class FaceTransformations:
     
     class UpAndDown:
-        ### FACE TRANSFORMATIONS FOR ROTATION UP & DOWN
+        
+        # * FACE TRANSFORMATIONS FOR UP & DOWN ROTATIONS
     
         def transform_right_face(current_front, is_rotate_down=True):
             right_face = current_front.right.copy()
@@ -369,7 +486,8 @@ class FaceTransformations:
     
         
     class LeftAndRight:
-        ### FACE TRANSFORMATIONS FOR ROTATION LEFT & RIGHT
+        
+        # * FACE TRANSFORMATIONS FOR LEFT & RIGHT ROTATIONS
         
         def transform_right_face(current_front, is_left=False):
             right_face = current_front.right.copy()
@@ -494,7 +612,8 @@ class FaceTransformations:
         
         
     class Inversion:
-        ### FACE TRANSFORMATIONS FOR CUBE INVERSION
+        
+        # * FACE TRANSFORMATIONS FOR CUBE INVERSION
         
         def transform_top_bottom_faces(current_front, axis, is_top=True):
             if is_top:

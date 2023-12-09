@@ -32,11 +32,30 @@ class Cube(Perspectives):
             
     
     def copy(self):
+        """
+        * This method returns a copy of a cube with all attributes duplicated.
+        
+        @params: None
+        @modifies: None
+        @returns: Cube() (Cube) - a duplicate cube object with same attributes.
+        """
         return Cube(self.current_perspective, self.initial_perspective, self.blue_face, self.white_face, self.yellow_face, \
                     self.red_face, self.orange_face, self.green_face, is_copy=True)
     
     
     def initialize_random_cube(self):
+        """
+        * This method initializes the Rubix Cube. The faces are created, edges are joined, and positional attributes assigned.
+        ! So far, I've done initializing the cube.
+        TODO: Complete all possible operations (rotations and movements)
+        TODO: Finish reset perspective
+        TODO: Shuffle the cube (multiple operations)
+        * More documentation will follow
+        
+        @params: None
+        @modifies: Cube().__getattrs__.* - All attributes in Cube()
+        @returns: None
+        """
         
         #* Creating the faces
         
@@ -127,6 +146,14 @@ class Cube(Perspectives):
         
         
     def rotate_left(self, axis):
+        """
+        * This method performs the operation of rotating the cube leftwards. It makes calls to get the 
+        * transformed faces of the cube. These values are then transferred into the existing Face object.
+        
+        @params: axis (ENUM) - The enum is defined in Constraints.Axes . Tells the program along which axis to rotate.
+        @modifies: Face().__getattrs__.* - All attribute values for each of the faces in the Cube object.
+        @returns: None
+        """
         current = self.current_perspective
         
         if axis == Axes.VERTICAL:
@@ -192,6 +219,14 @@ class Cube(Perspectives):
             self.transfer_faces(self.current_perspective.opposite, new_back_face)
             
     def rotate_right(self, axis):
+        """
+        * This method performs the operation of rotating the cube rightwards. It makes calls to get the 
+        * transformed faces of the cube. These values are then transferred into the existing Face object.
+        
+        @params: axis (ENUM) - The enum is defined in Constraints.Axes . Tells the program along which axis to rotate.
+        @modifies: Face().__getattrs__.* - All attribute values for each of the faces in the Cube object.
+        @returns: None
+        """
         current = self.current_perspective
         
         if axis == Axes.VERTICAL:
@@ -257,6 +292,14 @@ class Cube(Perspectives):
             self.transfer_faces(self.current_perspective.opposite, new_back_face)
         
     def rotate_up(self):
+        """
+        * This method performs the operation of rotating the cube upwards. It makes calls to get the 
+        * transformed faces of the cube. These values are then transferred into the existing Face object.
+        
+        @params: None
+        @modifies: Face().__getattrs__.* - All attribute values for each of the faces in the Cube object.
+        @returns: None
+        """
         print('ROTATING UP')
         current = self.current_perspective
         
@@ -302,7 +345,14 @@ class Cube(Perspectives):
         self.transfer_faces(self.current_perspective.opposite, new_top_face)
         
     def rotate_down(self):
+        """
+        * This method performs the operation of rotating the cube downwards. It makes calls to get the 
+        * transformed faces of the cube. These values are then transferred into the existing Face object.
         
+        @params: None
+        @modifies: Face().__getattrs__.* - All attribute values for each of the faces in the Cube object.
+        @returns: None
+        """
         print('ROTATING DOWN')
         current = self.current_perspective
         
@@ -348,6 +398,14 @@ class Cube(Perspectives):
         self.transfer_faces(self.current_perspective.opposite, new_bottom_face)
         
     def invert_cube(self, axis=Axes.VERTICAL):
+        """
+        * This method performs the operation of inverting the cube. It makes calls to get the 
+        * transformed faces of the cube. These values are then transferred into the existing Face object.
+        
+        @params: axis (ENUM) - The enum is defined in Constraints.Axes . Tells the program along which axis to invert.
+        @modifies: Face().__getattrs__.* - All attribute values for each of the faces in the Cube object.
+        @returns: None
+        """
         current = self.current_perspective
         
         if axis == Axes.VERTICAL:

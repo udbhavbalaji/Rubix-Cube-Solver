@@ -2,6 +2,7 @@ import unittest
 from CubeInit import Cube, Face, Piece
 from Constraints import FacePositions, Axes
 from Transformations import FaceTransformations, GridTransformations
+import Predicates
 
 class TestValidity(unittest.TestCase):
     
@@ -10,6 +11,16 @@ class TestValidity(unittest.TestCase):
         self.assertEqual(cube.current_perspective.left.right, cube.current_perspective)
         self.assertEqual(cube.current_perspective.top.back, cube.current_perspective.opposite)
         self.assertEqual(cube.current_perspective.bottom.front, cube.current_perspective)
+        
+    def test_predicate_correct_perspective_init(self):
+        cube = Cube()
+        self.assertTrue(Predicates.FacePredicates.is_correct_perspective(cube))
+        
+    def test_predicate_correct_perspective_after_rotation(self):
+        cube = Cube()
+        cube.rotate_down()
+        cube.rotate_up()
+        self.assertTrue(Predicates.FacePredicates.is_correct_perspective(cube))
             
     def test_opposite_faces(self):
         cube = Cube()
@@ -63,7 +74,6 @@ class TestValidity(unittest.TestCase):
         self.assertEqual(new_left_face.top, cube.current_perspective.bottom)
         self.assertEqual(new_left_face.opposite, cube.current_perspective.right)
         self.assertEqual(new_left_face.right, cube.current_perspective.opposite)
-        pass
         
     # def test_right_face_transformation_rotate_down(self):
     #     cube = Cube()

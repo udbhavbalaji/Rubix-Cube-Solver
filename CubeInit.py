@@ -747,7 +747,7 @@ if __name__ == "__main__":
     cube.rotate_left(Axes.HORIZONTAL)
     cube.rotate_right(Axes.HORIZONTAL)
     cube.rotate_left(Axes.VERTICAL)
-    cube.rotate_right(Axes.VERTICAL)
+    # cube.rotate_right(Axes.VERTICAL)
     # cube.rotate_right(Axes.HORIZONTAL)
     # cube.rotate_right(Axes.HORIZONTAL)
     # cube.rotate_right(Axes.HORIZONTAL)
@@ -773,6 +773,6 @@ if __name__ == "__main__":
     # print(Predicates.FacePredicates.is_yellow_face_bottom(cube.current_perspective, cube.yellow_face))
     cube.print_cube_grid()
     # cube.get_attributes()
-    # cube.reset_perspective()
-    # cube.print_cube_grid()
+    cube.reset_perspective()
+    cube.print_cube_grid()
     

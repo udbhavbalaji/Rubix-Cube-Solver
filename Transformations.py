@@ -590,15 +590,24 @@ class FaceTransformations:
                     face.left = old_face.back
                     face.right = old_face.front
             else:
+                # TODO: Have to add another if statement to handle bottom face (not same updates as for top face)
                 if is_left:
-                    face.right = old_face.front
-                    face.left = old_face.back
+                    if not is_top:
+                        face.right = old_face.back
+                        face.left = old_face.front
+                    else:
+                        face.right = old_face.front
+                        face.left = old_face.back
                     
                     face.top = old_face.right
                     face.bottom = old_face.left
                 else:
-                    face.right = old_face.back
-                    face.left = old_face.front
+                    if not is_top:
+                        face.right = old_face.front
+                        face.left = old_face.back
+                    else:
+                        face.right = old_face.back
+                        face.left = old_face.front
                     
                     face.top = old_face.left
                     face.bottom = old_face.right

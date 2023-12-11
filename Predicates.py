@@ -37,3 +37,9 @@ class FacePredicates:
 class GridPredicates:
     
     pass
+
+
+class PiecePredicates:
+    
+    def are_pieces_equal(piece_one, piece_two):
+        return piece_one == piece_two

@@ -519,24 +519,24 @@ class Cube():
     def get_2D_cube_grid(self, face, orientation):
         print(face.center_colour)
         if orientation == Orientation.LEFT:
-            first_row = f'{face.grid[FacePositions.TOP_RIGHT]} {face.grid[FacePositions.TOP_CENTER]} {face.grid[FacePositions.TOP_LEFT]}'
-            second_row = f'{face.grid[FacePositions.MID_RIGHT]} {face.grid[FacePositions.MID_CENTER].colour[0]} {face.grid[FacePositions.MID_LEFT]}'
-            third_row = f'{face.grid[FacePositions.BOTTOM_RIGHT]} {face.grid[FacePositions.BOTTOM_CENTER]} {face.grid[FacePositions.BOTTOM_LEFT]}'
+            first_row = f'{face.grid[FacePositions.TOP_RIGHT].colour[0]} {face.grid[FacePositions.TOP_CENTER].colour[0]} {face.grid[FacePositions.TOP_LEFT].colour[0]}'
+            second_row = f'{face.grid[FacePositions.MID_RIGHT].colour[0]} {face.grid[FacePositions.MID_CENTER].colour[0]} {face.grid[FacePositions.MID_LEFT].colour[0]}'
+            third_row = f'{face.grid[FacePositions.BOTTOM_RIGHT].colour[0]} {face.grid[FacePositions.BOTTOM_CENTER].colour[0]} {face.grid[FacePositions.BOTTOM_LEFT].colour[0]}'
             
         elif orientation in [Orientation.FRONT, Orientation.BOTTOM, Orientation.TOP]:
-            first_row = f'{face.grid[FacePositions.TOP_LEFT]} {face.grid[FacePositions.MID_LEFT]} {face.grid[FacePositions.BOTTOM_LEFT]}'
-            second_row = f'{face.grid[FacePositions.TOP_CENTER]} {face.grid[FacePositions.MID_CENTER].colour[0]} {face.grid[FacePositions.BOTTOM_CENTER]}'
-            third_row = f'{face.grid[FacePositions.TOP_RIGHT]} {face.grid[FacePositions.MID_RIGHT]} {face.grid[FacePositions.BOTTOM_RIGHT]}'
+            first_row = f'{face.grid[FacePositions.TOP_LEFT].colour[0]} {face.grid[FacePositions.MID_LEFT].colour[0]} {face.grid[FacePositions.BOTTOM_LEFT].colour[0]}'
+            second_row = f'{face.grid[FacePositions.TOP_CENTER].colour[0]} {face.grid[FacePositions.MID_CENTER].colour[0]} {face.grid[FacePositions.BOTTOM_CENTER].colour[0]}'
+            third_row = f'{face.grid[FacePositions.TOP_RIGHT].colour[0]} {face.grid[FacePositions.MID_RIGHT].colour[0]} {face.grid[FacePositions.BOTTOM_RIGHT].colour[0]}'
             
         elif orientation == Orientation.BACK:
-            first_row = f'{face.grid[FacePositions.BOTTOM_RIGHT]} {face.grid[FacePositions.MID_RIGHT]} {face.grid[FacePositions.TOP_RIGHT]}'
-            second_row = f'{face.grid[FacePositions.BOTTOM_CENTER]} {face.grid[FacePositions.MID_CENTER].colour[0]} {face.grid[FacePositions.TOP_CENTER]}'
-            third_row = f'{face.grid[FacePositions.BOTTOM_LEFT]} {face.grid[FacePositions.MID_LEFT]} {face.grid[FacePositions.TOP_LEFT]}'
+            first_row = f'{face.grid[FacePositions.BOTTOM_RIGHT].colour[0]} {face.grid[FacePositions.MID_RIGHT].colour[0]} {face.grid[FacePositions.TOP_RIGHT].colour[0]}'
+            second_row = f'{face.grid[FacePositions.BOTTOM_CENTER].colour[0]} {face.grid[FacePositions.MID_CENTER].colour[0]} {face.grid[FacePositions.TOP_CENTER].colour[0]}'
+            third_row = f'{face.grid[FacePositions.BOTTOM_LEFT].colour[0]} {face.grid[FacePositions.MID_LEFT].colour[0]} {face.grid[FacePositions.TOP_LEFT].colour[0]}'
             
         elif orientation == Orientation.RIGHT:
-            first_row = f'{face.grid[FacePositions.BOTTOM_LEFT]} {face.grid[FacePositions.BOTTOM_CENTER]} {face.grid[FacePositions.BOTTOM_RIGHT]}'
-            second_row = f'{face.grid[FacePositions.MID_LEFT]} {face.grid[FacePositions.MID_CENTER].colour[0]} {face.grid[FacePositions.MID_RIGHT]}'
-            third_row = f'{face.grid[FacePositions.TOP_LEFT]} {face.grid[FacePositions.TOP_CENTER]} {face.grid[FacePositions.TOP_RIGHT]}'
+            first_row = f'{face.grid[FacePositions.BOTTOM_LEFT].colour[0]} {face.grid[FacePositions.BOTTOM_CENTER].colour[0]} {face.grid[FacePositions.BOTTOM_RIGHT].colour[0]}'
+            second_row = f'{face.grid[FacePositions.MID_LEFT].colour[0]} {face.grid[FacePositions.MID_CENTER].colour[0]} {face.grid[FacePositions.MID_RIGHT].colour[0]}'
+            third_row = f'{face.grid[FacePositions.TOP_LEFT].colour[0]} {face.grid[FacePositions.TOP_CENTER].colour[0]} {face.grid[FacePositions.TOP_RIGHT].colour[0]}'
         
         return (first_row, second_row, third_row)
     
@@ -647,21 +647,40 @@ class Face:
         return Face(self.center_colour, self.right, self.left, self.top, self.bottom, self.front, self.back, self.opposite, self.is_side_face, is_copy=True, grid=self.grid.copy())
         
     def initialize_center_pieces(self):
-        
+        ## Creating center piece
         center_piece = Piece(FacePositions.MID_CENTER, self, PieceType.CENTER)
         colour = center_piece.colour[0]
         
-        grid = [
-            [1, 2, 3],
-            [4, center_piece, 6],
-            [7, 8, 9]
-        ]
+        ## Creating edge pieces
+        top_center_piece = EdgePiece(FacePositions.TOP_CENTER, self, PieceType.EDGE)
+        mid_left_piece = EdgePiece(FacePositions.MID_LEFT, self, PieceType.EDGE)
+        bottom_center_piece = EdgePiece(FacePositions.BOTTOM_CENTER, self, PieceType.EDGE)
+        mid_right_piece = EdgePiece(FacePositions.MID_RIGHT, self, PieceType.EDGE)
+        
+        ## Creating corner pieces
+        top_left_piece = CornerPiece(FacePositions.TOP_LEFT, self, PieceType.CORNER)
+        top_right_piece = CornerPiece(FacePositions.TOP_RIGHT, self, PieceType.CORNER)
+        bottom_left_piece = CornerPiece(FacePositions.BOTTOM_LEFT, self, PieceType.CORNER)
+        bottom_right_piece = CornerPiece(FacePositions.BOTTOM_RIGHT, self, PieceType.CORNER)
+        
+        
+        # grid = [
+        #     [1, 2, 3],
+        #     [4, center_piece, 6],
+        #     [7, 8, 9]
+        # ]
         
         # grid = [
         #     [colour, colour, colour],
         #     [colour, center_piece, colour],
         #     [colour, colour, colour]
         # ]
+        
+        grid = [
+            [top_left_piece, top_center_piece, top_right_piece],
+            [mid_left_piece, center_piece, mid_right_piece],
+            [bottom_left_piece, bottom_center_piece, bottom_right_piece]
+        ]
         
         return np.array(grid)
 
@@ -685,13 +704,37 @@ class Column:
 
 
 class Piece:
-    def __init__(self, face_position, face:Face, piece_type:PieceType, complements=()):
+    def __init__(self, face_position, face, piece_type):
         self.face_position = face_position
         self.face = face
         self.colour = self.face.center_colour
         self.piece_type = piece_type
+        
+    
+    def update_face_position(self):
+        positions = [FacePositions.TOP_LEFT, FacePositions.TOP_CENTER, FacePositions.TOP_RIGHT, 
+                     FacePositions.MID_LEFT, FacePositions.MID_CENTER, FacePositions.MID_RIGHT,
+                     FacePositions.BOTTOM_LEFT, FacePositions.BOTTOM_CENTER, FacePositions.BOTTOM_RIGHT]
+        for position in positions:
+            Predicates.PiecePredicates.are_pieces_equal()
+            pass
+        pass
+        
+
+class EdgePiece(Piece):
+    
+    def __init__(self, face_position, face, piece_type, complement=()):
+        super().__init__(face_position, face, piece_type)
+        self.complement = complement
+        
+        
+class CornerPiece(Piece):
+    
+    def __init__(self, face_position, face, piece_type, complements=()):
+        super().__init__(face_position, face, piece_type)
         self.complements = complements
-    pass
+    
+    
 
 if __name__ == "__main__":
     cube = Cube()
@@ -700,6 +743,27 @@ if __name__ == "__main__":
     # cube.get_attributes()
     # cube.rotate_down()
     # cube.rotate_left(Axes.HORIZONTAL)
+    # Shifts.top_row_left(cube.current_perspective)
+    # Shifts.top_row_left(cube.current_perspective)
+    # Shifts.bottom_row_left(cube.current_perspective)
+    # Shifts.bottom_row_left(cube.current_perspective)
+    
+    # cube.rotate_left(Axes.HORIZONTAL)
+    
+    # Shifts.top_row_left(cube.current_perspective)
+    # Shifts.top_row_left(cube.current_perspective)
+    # Shifts.bottom_row_left(cube.current_perspective)
+    # Shifts.bottom_row_left(cube.current_perspective)
+    
+    # cube.rotate_down()
+    
+    # Shifts.top_row_left(cube.current_perspective)
+    # Shifts.top_row_left(cube.current_perspective)
+    # Shifts.bottom_row_left(cube.current_perspective)
+    # Shifts.bottom_row_left(cube.current_perspective)
+    
+    Shifts.right_column_up(cube.current_perspective)
+    
     # cube.rotate_right(Axes.HORIZONTAL)
     # cube.rotate_left(Axes.VERTICAL)
     # cube.rotate_right(Axes.VERTICAL)
@@ -711,9 +775,9 @@ if __name__ == "__main__":
     # cube.rotate_right(Axes.HORIZONTAL)
     # cube.rotate_right(Axes.HORIZONTAL)
     # cube.rotate_right(Axes.HORIZONTAL)
-    Shifts.right_column_up(cube.current_perspective)
+    # Shifts.right_column_up(cube.current_perspective)
     cube.print_cube_grid()
-    Shifts.right_column_down(cube.current_perspective)
+    # Shifts.right_column_down(cube.current_perspective)
     # print('Blue')
     # print(cube.current_perspective.grid)
     # print('Red')
@@ -741,7 +805,7 @@ if __name__ == "__main__":
     # print(Predicates.FacePredicates.is_red_face_left(cube.current_perspective, cube.red_face))
     # print(Predicates.FacePredicates.is_green_face_back(cube.current_perspective, cube.green_face))
     # print(Predicates.FacePredicates.is_yellow_face_bottom(cube.current_perspective, cube.yellow_face))
-    cube.print_cube_grid()
+    # cube.print_cube_grid()
     # cube.get_attributes()
     # cube.reset_perspective()
     # cube.print_cube_grid()

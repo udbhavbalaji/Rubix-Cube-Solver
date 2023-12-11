@@ -96,7 +96,7 @@ class Cube():
         self.white_face.left = self.red_face
         self.red_face.top = self.white_face
         
-        ##Joining the bottom face
+        ## Joining the bottom face
         self.yellow_face.front = self.blue_face
         self.blue_face.bottom = self.yellow_face
         
@@ -119,6 +119,31 @@ class Cube():
         self.red_face.opposite = self.orange_face
         self.orange_face.opposite = self.red_face
         
+        ## Initializing complements
+        # Blue Face
+        self.assign_complements(self.current_perspective)
+        self.rotate_left(Axes.VERTICAL)
+        # Orange Face
+        self.assign_complements(self.current_perspective)
+        self.rotate_left(Axes.VERTICAL)
+        # Green Face
+        self.assign_complements(self.current_perspective)
+        self.rotate_left(Axes.VERTICAL)
+        # Red Face
+        self.assign_complements(self.current_perspective)
+        self.rotate_left(Axes.VERTICAL)
+        # Back to Blue Face
+        self.rotate_down()
+        # White Face
+        self.assign_complements(self.current_perspective)
+        self.rotate_up()
+        self.rotate_up()
+        # Yellow Face
+        self.assign_complements(self.current_perspective)
+        
+        # Back to Blue Face
+        self.reset_perspective()
+        
         print('\n')
         print(self.blue_face)
         print(self.white_face)
@@ -129,6 +154,30 @@ class Cube():
         print('\n')
         
         self.assign_piece_colours()
+        
+        
+    def assign_complements(self, face):
+        # //front_face = self.current_perspective.copy()
+        # //back_face = self.current_perspective.opposite.copy()
+        # //left_face = self.current_perspective.left.copy()
+        # //right_face = self.current_perspective.right.copy()
+        # //top_face = self.current_perspective.top.copy()
+        # //bottom_face = self.current_perspective.bottom.copy()
+        
+        ## Assigning complements of edge pieces
+        face.grid[FacePositions.TOP_CENTER].complement = face.top.grid[FacePositions.BOTTOM_CENTER]
+        face.grid[FacePositions.MID_LEFT].complement = face.left.grid[FacePositions.MID_RIGHT]
+        face.grid[FacePositions.MID_RIGHT].complement = face.right.grid[FacePositions.MID_LEFT]
+        face.grid[FacePositions.BOTTOM_CENTER].complement = face.bottom.grid[FacePositions.TOP_CENTER]
+        
+        ## Assigning complements for corner pieces
+        face.grid[FacePositions.TOP_LEFT].complements = (face.top.grid[FacePositions.BOTTOM_LEFT], face.left.grid[FacePositions.TOP_RIGHT])
+        face.grid[FacePositions.TOP_RIGHT].complements = (face.top.grid[FacePositions.BOTTOM_RIGHT], face.right.grid[FacePositions.TOP_LEFT])
+        face.grid[FacePositions.BOTTOM_LEFT].complements = (face.bottom.grid[FacePositions.TOP_LEFT], face.left.grid[FacePositions.BOTTOM_RIGHT])
+        face.grid[FacePositions.BOTTOM_RIGHT].complements = (face.bottom.grid[FacePositions.TOP_RIGHT], face.right.grid[FacePositions.BOTTOM_LEFT])
+        
+        
+        pass
         
         
     def assign_piece_colours(self):
@@ -739,7 +788,7 @@ class CornerPiece(Piece):
 if __name__ == "__main__":
     cube = Cube()
     # print(Predicates.FacePredicates.is_correct_perspective(cube))
-    cube.print_cube_grid()
+    # cube.print_cube_grid()
     # cube.get_attributes()
     # cube.rotate_down()
     # cube.rotate_left(Axes.HORIZONTAL)
@@ -747,9 +796,15 @@ if __name__ == "__main__":
     # Shifts.top_row_left(cube.current_perspective)
     # Shifts.bottom_row_left(cube.current_perspective)
     # Shifts.bottom_row_left(cube.current_perspective)
+    print(cube.current_perspective.grid[FacePositions.TOP_LEFT])
+    print(cube.current_perspective.grid[FacePositions.TOP_LEFT].complements)
     
+    print(cube.current_perspective.left.grid[FacePositions.TOP_RIGHT])
+    print(cube.current_perspective.left.grid[FacePositions.TOP_RIGHT].complements)
     # cube.rotate_left(Axes.HORIZONTAL)
     
+    print(cube.current_perspective.top.grid[FacePositions.BOTTOM_LEFT])
+    print(cube.current_perspective.top.grid[FacePositions.BOTTOM_LEFT].complements)
     # Shifts.top_row_left(cube.current_perspective)
     # Shifts.top_row_left(cube.current_perspective)
     # Shifts.bottom_row_left(cube.current_perspective)
@@ -762,7 +817,8 @@ if __name__ == "__main__":
     # Shifts.bottom_row_left(cube.current_perspective)
     # Shifts.bottom_row_left(cube.current_perspective)
     
-    Shifts.right_column_up(cube.current_perspective)
+    # Shifts.right_column_up(cube.current_perspective)
+    # Shifts.left_column_up(cube.current_perspective)
     
     # cube.rotate_right(Axes.HORIZONTAL)
     # cube.rotate_left(Axes.VERTICAL)
@@ -776,7 +832,7 @@ if __name__ == "__main__":
     # cube.rotate_right(Axes.HORIZONTAL)
     # cube.rotate_right(Axes.HORIZONTAL)
     # Shifts.right_column_up(cube.current_perspective)
-    cube.print_cube_grid()
+    # cube.print_cube_grid()
     # Shifts.right_column_down(cube.current_perspective)
     # print('Blue')
     # print(cube.current_perspective.grid)

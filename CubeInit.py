@@ -4,11 +4,12 @@ POSSIBLE ADDITIONS: Ability for user to enter a cube configuration to test out t
 """
 
 import numpy as np
-from Constraints import Perspectives, Colours, Axes, PieceType, PossibleCornerPieces, FacePositions, Orientation
+from Constraints import Colours, Axes, PieceType, PossibleCornerPieces, FacePositions, Orientation
 from Transformations import GridTransformations, FaceTransformations
 import Predicates
+from Operations import Shifts
 
-class Cube(Perspectives):
+class Cube():
     
     NUM_FACES = 6
     # $ Face Order: Front, Right, Back, Left, Top, Bottom
@@ -569,8 +570,7 @@ class Cube(Perspectives):
         
     
     def reset_perspective(self):
-        #TODO: Redo complete function
-        ## As long as cube isn't in the currect perspective
+        print('RESETTING PERSPECTIVE')
         iters = 0
         while True:
             blue_face_orientation = self.get_orientation()
@@ -599,8 +599,6 @@ class Cube(Perspectives):
                         self.rotate_left(Axes.HORIZONTAL)
                 iters += 1
             
-            pass
-        pass
     
     def get_orientation(self):
         if Predicates.FacePredicates.are_faces_equal(self.current_perspective.top, self.blue_face):
@@ -613,57 +611,7 @@ class Cube(Perspectives):
             return Orientation.BOTTOM
         elif Predicates.FacePredicates.are_faces_equal(self.current_perspective.opposite, self.blue_face):
             return Orientation.BACK
-    
-    
-    
-    
-    #     while True:
-    #         # print(self.is_correct_perspective())
-    #         print(f'\n{self.is_correct_perspective()}')
-    #         print(self.is_right_face())
-    #         print(self.is_left_face())
-    #         print(self.is_top_face())
-    #         print(self.is_bottom_face())
-    #         print(f'{self.is_front_back_faces_inverted()}\n')
-            
-    #         #? Does is_correct_perspective() return the right logic?
-    #         if self.is_correct_perspective():
-    #             break
-    #         elif self.is_front_back_faces_inverted():
-    #             self.invert_cube()
-    #         elif self.is_right_face():
-    #             self.rotate_left(Axes.VERTICAL)
-    #         elif self.is_left_face():
-    #             self.rotate_right(Axes.VERTICAL)
-    #         elif self.is_top_face():
-    #             self.rotate_down()
-    #         elif self.is_bottom_face():
-    #             self.rotate_up()
-    #         else:
-    #             self.rotate_left(Axes.HORIZONTAL)
 
-    
-    # def is_correct_perspective(self):
-    #     return (self.current_perspective.center_colour == Colours.BLUE and \
-    #         self.current_perspective.top.center_colour == Colours.WHITE and \
-    #             self.current_perspective.left.center_colour == Colours.RED)
-        
-    # def is_front_back_faces_inverted(self):
-    #     return self.current_perspective.opposite.center_colour == Colours.BLUE
-    
-    # def is_right_face(self):
-    #     return self.current_perspective.right.center_colour == Colours.BLUE
-    
-    # def is_left_face(self):
-    #     return self.current_perspective.left.center_colour == Colours.BLUE
-    
-    # def is_top_face(self):
-    #     return self.current_perspective.top.center_colour == Colours.BLUE
-    
-    # def is_bottom_face(self):
-    #     return self.current_perspective.bottom.center_colour == Colours.BLUE
-
-    
 
 class Face:
     def __init__(self, colour=None, right=None, left=None, top=None, bottom=None, front=None, back=None, opposite=None, is_side_face=True, is_copy=False, grid=None):
@@ -701,6 +649,7 @@ class Face:
     def initialize_center_pieces(self):
         
         center_piece = Piece(FacePositions.MID_CENTER, self, PieceType.CENTER)
+        colour = center_piece.colour[0]
         
         grid = [
             [1, 2, 3],
@@ -708,9 +657,15 @@ class Face:
             [7, 8, 9]
         ]
         
+        # grid = [
+        #     [colour, colour, colour],
+        #     [colour, center_piece, colour],
+        #     [colour, colour, colour]
+        # ]
+        
         return np.array(grid)
 
-
+#! DeprecationWarning: Class Row will not be used for this project and will be subsequently removed in future versions.
 class Row:
     def __init__(self, left, center, right):
         self.left = left
@@ -719,7 +674,7 @@ class Row:
         pass
     pass
 
-
+#! DeprecationWarning: Class Column will not be used for this project and will be subsequently removed in future versions.
 class Column:
     def __init__(self, top, center, bottom):
         self.top = top
@@ -740,13 +695,13 @@ class Piece:
 
 if __name__ == "__main__":
     cube = Cube()
-    print(Predicates.FacePredicates.is_correct_perspective(cube))
+    # print(Predicates.FacePredicates.is_correct_perspective(cube))
     cube.print_cube_grid()
     # cube.get_attributes()
-    cube.rotate_down()
-    cube.rotate_left(Axes.HORIZONTAL)
-    cube.rotate_right(Axes.HORIZONTAL)
-    cube.rotate_left(Axes.VERTICAL)
+    # cube.rotate_down()
+    # cube.rotate_left(Axes.HORIZONTAL)
+    # cube.rotate_right(Axes.HORIZONTAL)
+    # cube.rotate_left(Axes.VERTICAL)
     # cube.rotate_right(Axes.VERTICAL)
     # cube.rotate_right(Axes.HORIZONTAL)
     # cube.rotate_right(Axes.HORIZONTAL)
@@ -756,7 +711,22 @@ if __name__ == "__main__":
     # cube.rotate_right(Axes.HORIZONTAL)
     # cube.rotate_right(Axes.HORIZONTAL)
     # cube.rotate_right(Axes.HORIZONTAL)
-    cube.rotate_up()
+    Shifts.right_column_up(cube.current_perspective)
+    cube.print_cube_grid()
+    Shifts.right_column_down(cube.current_perspective)
+    # print('Blue')
+    # print(cube.current_perspective.grid)
+    # print('Red')
+    # print(cube.current_perspective.left.grid)
+    # print('Orange')
+    # print(cube.current_perspective.right.grid)
+    # print('Green')
+    # print(cube.current_perspective.opposite.grid)
+    # print('White')
+    # print(cube.current_perspective.top.grid)
+    # print('Yellow')
+    # print(cube.current_perspective.bottom.grid)
+    # cube.rotate_up()
     # cube.rotate_up()
     # cube.rotate_up()
     # cube.rotate_up()
@@ -773,6 +743,6 @@ if __name__ == "__main__":
     # print(Predicates.FacePredicates.is_yellow_face_bottom(cube.current_perspective, cube.yellow_face))
     cube.print_cube_grid()
     # cube.get_attributes()
-    cube.reset_perspective()
-    cube.print_cube_grid()
+    # cube.reset_perspective()
+    # cube.print_cube_grid()
     

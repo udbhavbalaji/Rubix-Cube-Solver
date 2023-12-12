@@ -36,6 +36,12 @@ class FacePredicates:
 
 class GridPredicates:
     
+    def are_grids_equal(grid_one, grid_two):
+        for position in FacePositions.POSITIONS:
+            if grid_one[position] != grid_two[position]:
+                return False
+        return True
+    
     pass
 
 

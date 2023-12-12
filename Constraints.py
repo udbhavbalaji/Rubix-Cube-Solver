@@ -66,6 +66,8 @@ class FacePositions:
     CENTER_COL = 1
     RIGHT_COL = 2
     
+    POSITIONS = [TOP_LEFT, TOP_CENTER, TOP_RIGHT, MID_LEFT, MID_CENTER, MID_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT]
+    
     def get_colour(face, face_position):
         return face.grid[face_position]
     
@@ -77,17 +79,3 @@ class Orientation:
     RIGHT = 'Right'
     TOP = 'Top'
     BOTTOM = 'Bottom'
-
-
-
-class Perspectives:
-    # def __init__(self):
-    #     self.current_perspective = Colours.BLUE
-        
-    #     pass
-    
-    def change_perspective():
-        pass
-    
-    
-    pass

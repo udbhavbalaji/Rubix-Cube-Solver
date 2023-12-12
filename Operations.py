@@ -27,7 +27,6 @@ class Shifts:
         current.top.grid = new_top_grid
         current.bottom.grid = new_bottom_grid
     
-    
     def left_column_up(current_front):
         current = current_front
         
@@ -48,7 +47,6 @@ class Shifts:
         current.opposite.grid = new_back_grid
         current.top.grid = new_top_grid
         current.bottom.grid = new_bottom_grid
-    
     
     def right_column_down(current_front):
         current = current_front
@@ -71,7 +69,6 @@ class Shifts:
         current.top.grid = new_top_grid
         current.bottom.grid = new_bottom_grid
     
-    
     def left_column_down(current_front):
         current = current_front
         
@@ -92,7 +89,6 @@ class Shifts:
         current.opposite.grid = new_back_grid
         current.top.grid = new_top_grid
         current.bottom.grid = new_bottom_grid
-    
     
     def top_row_right(current_front):
         current = current_front
@@ -115,7 +111,6 @@ class Shifts:
         current.opposite.grid = new_back_grid
         current.top.grid = new_top_grid
 
-    
     def top_row_left(current_front):
         current = current_front
         
@@ -136,7 +131,6 @@ class Shifts:
         current.right.grid = new_right_grid
         current.opposite.grid = new_back_grid
         current.top.grid = new_top_grid
-    
     
     def bottom_row_right(current_front):
         current = current_front
@@ -159,7 +153,6 @@ class Shifts:
         current.opposite.grid = new_back_grid
         current.bottom.grid = new_bottom_grid
     
-    
     def bottom_row_left(current_front):
         current = current_front
         
@@ -181,16 +174,3 @@ class Shifts:
         current.opposite.grid = new_back_grid
         current.bottom.grid = new_bottom_grid
     
-        
-    # Defining the possible operations
-    # RIGHT_COLUMN_UP = right_column_up()
-    # LEFT_COLUMN_UP = left_column_up()
-    # RIGHT_COLUMN_DOWN = right_column_down()
-    # LEFT_COLUMN_DOWN = left_column_down()
-    
-    # TOP_ROW_RIGHT = top_row_right()
-    # TOP_ROW_LEFT = top_row_left()
-    # BOTTOM_ROW_RIGHT = bottom_row_right()
-    # BOTTOM_ROW_LEFT = bottom_row_left()
-    
-    pass

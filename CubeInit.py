@@ -30,19 +30,16 @@ class Cube():
         
         if not is_copy:
             self.initialize_random_cube()
-            
     
     def copy(self):
         """
-        * This method returns a copy of a cube with all attributes duplicated.
-        
-        @params: None
-        @modifies: None
-        @returns: Cube() (Cube) - a duplicate cube object with same attributes.
+        This method creates and returns a copy of the current object (Cube) with all attribute values duplicated.
+
+        Returns:
+            Cube: A copy of the current instance is created and returned.
         """
         return Cube(self.current_perspective, self.initial_perspective, self.blue_face, self.white_face, self.yellow_face, \
                     self.red_face, self.orange_face, self.green_face, is_copy=True)
-    
     
     def initialize_random_cube(self):
         """
@@ -153,17 +150,7 @@ class Cube():
         print(self.red_face)
         print('\n')
         
-        self.assign_piece_colours()
-        
-        
-    def assign_complements(self, face):
-        # //front_face = self.current_perspective.copy()
-        # //back_face = self.current_perspective.opposite.copy()
-        # //left_face = self.current_perspective.left.copy()
-        # //right_face = self.current_perspective.right.copy()
-        # //top_face = self.current_perspective.top.copy()
-        # //bottom_face = self.current_perspective.bottom.copy()
-        
+    def assign_complements(self, face):        
         ## Assigning complements of edge pieces
         face.grid[FacePositions.TOP_CENTER].complement = face.top.grid[FacePositions.BOTTOM_CENTER]
         face.grid[FacePositions.MID_LEFT].complement = face.left.grid[FacePositions.MID_RIGHT]
@@ -175,26 +162,7 @@ class Cube():
         face.grid[FacePositions.TOP_RIGHT].complements = (face.top.grid[FacePositions.BOTTOM_RIGHT], face.right.grid[FacePositions.TOP_LEFT])
         face.grid[FacePositions.BOTTOM_LEFT].complements = (face.bottom.grid[FacePositions.TOP_LEFT], face.left.grid[FacePositions.BOTTOM_RIGHT])
         face.grid[FacePositions.BOTTOM_RIGHT].complements = (face.bottom.grid[FacePositions.TOP_RIGHT], face.right.grid[FacePositions.BOTTOM_LEFT])
-        
-        
-        pass
-        
-        
-    def assign_piece_colours(self):
-        # Assigning edge pieces for Blue face
-        #// current = self.current_perspective
-        
-        #// current.grid[FacePositions.TOP_CENTER] = EdgePiece(FacePositions.TOP_CENTER, self)
-        #// current.grid[FacePositions.MID_LEFT] = EdgePiece(FacePositions.MID_LEFT, self)
-        #// current.grid[FacePositions.BOTTOM_CENTER] = EdgePiece(FacePositions.BOTTOM_CENTER, self)
-        #// current.grid[FacePositions.MID_RIGHT] = EdgePiece(FacePositions.MID_RIGHT, self)
-        
-        pass
-    
-    def assign_side_face_edges(self):
-        pass
-        
-        
+           
     def rotate_left(self, axis):
         """
         * This method performs the operation of rotating the cube leftwards. It makes calls to get the 
@@ -267,7 +235,7 @@ class Cube():
             self.transfer_faces(self.current_perspective.top, new_right_face)
             self.transfer_faces(self.current_perspective.bottom, new_left_face)
             self.transfer_faces(self.current_perspective.opposite, new_back_face)
-            
+                
     def rotate_right(self, axis):
         """
         * This method performs the operation of rotating the cube rightwards. It makes calls to get the 
@@ -446,7 +414,7 @@ class Cube():
         self.transfer_faces(self.current_perspective.top, new_back_face)
         self.transfer_faces(self.current_perspective.bottom, new_front_face)
         self.transfer_faces(self.current_perspective.opposite, new_bottom_face)
-        
+          
     def invert_cube(self, axis=Axes.VERTICAL):
         """
         * This method performs the operation of inverting the cube. It makes calls to get the 
@@ -616,7 +584,6 @@ class Cube():
         print('Front Colours')
         print(f'Front: {front.center_colour}, Left: {front.left.center_colour}, Right: {front.right.center_colour}, \
                 Top: {front.top.center_colour}, Bottom: {front.bottom.center_colour}, Back: {front.opposite.center_colour}\n')
-        
     
     def reset_perspective(self):
         print('RESETTING PERSPECTIVE')
@@ -647,7 +614,6 @@ class Cube():
                     else:
                         self.rotate_left(Axes.HORIZONTAL)
                 iters += 1
-            
     
     def get_orientation(self):
         if Predicates.FacePredicates.are_faces_equal(self.current_perspective.top, self.blue_face):
@@ -660,9 +626,10 @@ class Cube():
             return Orientation.BOTTOM
         elif Predicates.FacePredicates.are_faces_equal(self.current_perspective.opposite, self.blue_face):
             return Orientation.BACK
-
+        
 
 class Face:
+    
     def __init__(self, colour=None, right=None, left=None, top=None, bottom=None, front=None, back=None, opposite=None, is_side_face=True, is_copy=False, grid=None):
         self.center_colour = colour
         self.right = right
@@ -678,19 +645,6 @@ class Face:
             self.grid = grid
         else:
             self.grid = self.initialize_center_pieces()
-        
-    
-    def set_right_face(self, face):
-        self.right = face
-        
-    def set_left_face(self, face):
-        self.left = face
-        
-    def set_top_face(self, face):
-        self.top = face
-        
-    def set_bottom_face(self, face):
-        self.bottom = face
         
     def copy(self):
         return Face(self.center_colour, self.right, self.left, self.top, self.bottom, self.front, self.back, self.opposite, self.is_side_face, is_copy=True, grid=self.grid.copy())
@@ -712,18 +666,15 @@ class Face:
         bottom_left_piece = CornerPiece(FacePositions.BOTTOM_LEFT, self, PieceType.CORNER)
         bottom_right_piece = CornerPiece(FacePositions.BOTTOM_RIGHT, self, PieceType.CORNER)
         
+        # if self.is_test:
+            
+        #     grid = [
+        #         [1, 2, 3],
+        #         [4, 5, 6],
+        #         [7, 8, 9]
+        #     ]
         
-        # grid = [
-        #     [1, 2, 3],
-        #     [4, center_piece, 6],
-        #     [7, 8, 9]
-        # ]
-        
-        # grid = [
-        #     [colour, colour, colour],
-        #     [colour, center_piece, colour],
-        #     [colour, colour, colour]
-        # ]
+        # else:
         
         grid = [
             [top_left_piece, top_center_piece, top_right_piece],
@@ -733,6 +684,7 @@ class Face:
         
         return np.array(grid)
 
+
 #! DeprecationWarning: Class Row will not be used for this project and will be subsequently removed in future versions.
 class Row:
     def __init__(self, left, center, right):
@@ -741,6 +693,7 @@ class Row:
         self.right = right
         pass
     pass
+
 
 #! DeprecationWarning: Class Column will not be used for this project and will be subsequently removed in future versions.
 class Column:
@@ -753,38 +706,52 @@ class Column:
 
 
 class Piece:
+    
     def __init__(self, face_position, face, piece_type):
         self.face_position = face_position
         self.face = face
-        self.colour = self.face.center_colour
-        self.piece_type = piece_type
+        self._colour = self.face.center_colour
+        self._piece_type = piece_type
         
+    @property
+    def colour(self):
+        return self._colour
     
-    def update_face_position(self):
-        positions = [FacePositions.TOP_LEFT, FacePositions.TOP_CENTER, FacePositions.TOP_RIGHT, 
-                     FacePositions.MID_LEFT, FacePositions.MID_CENTER, FacePositions.MID_RIGHT,
-                     FacePositions.BOTTOM_LEFT, FacePositions.BOTTOM_CENTER, FacePositions.BOTTOM_RIGHT]
-        for position in positions:
-            Predicates.PiecePredicates.are_pieces_equal()
-            pass
-        pass
+    @property
+    def piece_type(self):
+        return self._piece_type
         
 
 class EdgePiece(Piece):
     
     def __init__(self, face_position, face, piece_type, complement=()):
         super().__init__(face_position, face, piece_type)
-        self.complement = complement
+        self._complement = complement
+        
+    @property
+    def complement(self):
+        return self._complement
+    
+    @complement.setter
+    def complement(self, new_complement):
+        self._complement = new_complement
         
         
 class CornerPiece(Piece):
     
     def __init__(self, face_position, face, piece_type, complements=()):
         super().__init__(face_position, face, piece_type)
-        self.complements = complements
+        self._complements = complements
+        
+    @property
+    def complements(self):
+        return self._complements
+    
+    @complements.setter
+    def complements(self, new_complements):
+        self._complements = new_complements
     
     
-
 if __name__ == "__main__":
     cube = Cube()
     # print(Predicates.FacePredicates.is_correct_perspective(cube))

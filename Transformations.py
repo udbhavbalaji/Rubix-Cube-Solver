@@ -3,48 +3,49 @@ from Constraints import Axes, FacePositions, Orientation
 
 class GridTransformations: 
     
-    def update_piece_positions(face):
-        top_left_piece = face.grid[FacePositions.TOP_LEFT]
-        top_center_piece = face.grid[FacePositions.TOP_CENTER]
-        top_right_piece = face.grid[FacePositions.TOP_RIGHT]
-        mid_left_piece = face.grid[FacePositions.MID_LEFT]
-        mid_center_piece = face.grid[FacePositions.MID_CENTER]
-        mid_right_piece = face.grid[FacePositions.MID_RIGHT]
-        bottom_left_piece = face.grid[FacePositions.BOTTOM_LEFT]
-        bottom_center_piece = face.grid[FacePositions.BOTTOM_CENTER]
-        bottom_right_piece = face.grid[FacePositions.BOTTOM_RIGHT]
-        
-        top_left_piece.face_position = FacePositions.TOP_LEFT
-        top_center_piece.face_position = FacePositions.TOP_CENTER
-        top_right_piece.face_position = FacePositions.TOP_RIGHT
-        mid_left_piece.face_position = FacePositions.MID_LEFT
-        mid_center_piece.face_position = FacePositions.MID_CENTER
-        mid_right_piece.face_position = FacePositions.MID_RIGHT
-        bottom_left_piece.face_position = FacePositions.BOTTOM_LEFT
-        bottom_center_piece.face_position = FacePositions.BOTTOM_CENTER
-        bottom_right_piece.face_position = FacePositions.BOTTOM_RIGHT
-        
-        top_left_piece.face = face
-        top_center_piece.face = face
-        top_right_piece.face = face
-        mid_left_piece.face = face
-        mid_center_piece.face = face
-        mid_right_piece.face = face
-        bottom_left_piece.face = face
-        bottom_center_piece.face = face
-        bottom_right_piece.face = face
-        
+    def update_piece_positions(face, is_test=False):
+        if not is_test:
+            top_left_piece = face.grid[FacePositions.TOP_LEFT]
+            top_center_piece = face.grid[FacePositions.TOP_CENTER]
+            top_right_piece = face.grid[FacePositions.TOP_RIGHT]
+            mid_left_piece = face.grid[FacePositions.MID_LEFT]
+            mid_center_piece = face.grid[FacePositions.MID_CENTER]
+            mid_right_piece = face.grid[FacePositions.MID_RIGHT]
+            bottom_left_piece = face.grid[FacePositions.BOTTOM_LEFT]
+            bottom_center_piece = face.grid[FacePositions.BOTTOM_CENTER]
+            bottom_right_piece = face.grid[FacePositions.BOTTOM_RIGHT]
+            
+            top_left_piece.face_position = FacePositions.TOP_LEFT
+            top_center_piece.face_position = FacePositions.TOP_CENTER
+            top_right_piece.face_position = FacePositions.TOP_RIGHT
+            mid_left_piece.face_position = FacePositions.MID_LEFT
+            mid_center_piece.face_position = FacePositions.MID_CENTER
+            mid_right_piece.face_position = FacePositions.MID_RIGHT
+            bottom_left_piece.face_position = FacePositions.BOTTOM_LEFT
+            bottom_center_piece.face_position = FacePositions.BOTTOM_CENTER
+            bottom_right_piece.face_position = FacePositions.BOTTOM_RIGHT
+            
+            top_left_piece.face = face
+            top_center_piece.face = face
+            top_right_piece.face = face
+            mid_left_piece.face = face
+            mid_center_piece.face = face
+            mid_right_piece.face = face
+            bottom_left_piece.face = face
+            bottom_center_piece.face = face
+            bottom_right_piece.face = face
+
     
     class ColumnUpAndDown:
         
         #* GRID TRANSFORMATIONS FOR COLUMN UP AND DOWN
-        def transform_left_face(current_front, is_rotate_down=True):
-            return GridTransformations.UpAndDown.transform_left_face(current_front, is_rotate_down=is_rotate_down)
+        def transform_left_face(current_front, is_rotate_down=True, is_test=False):
+            return GridTransformations.UpAndDown.transform_left_face(current_front, is_rotate_down=is_rotate_down, is_test=is_test)
         
-        def transform_right_face(current_front, is_rotate_down=True):
-            return GridTransformations.UpAndDown.transform_right_face(current_front, is_rotate_down=is_rotate_down)
+        def transform_right_face(current_front, is_rotate_down=True, is_test=False):
+            return GridTransformations.UpAndDown.transform_right_face(current_front, is_rotate_down=is_rotate_down, is_test=is_test)
         
-        def transform_front_face(current_front, is_rotate_down=True, is_right_col=True):
+        def transform_front_face(current_front, is_rotate_down=True, is_right_col=True, is_test=False):
             front_face = current_front.copy()
             old_face = front_face.copy()
             
@@ -68,11 +69,11 @@ class GridTransformations:
                     bottom_col = bottom_face.grid[:,FacePositions.LEFT_COL].copy()
                     front_face.grid[:,FacePositions.LEFT_COL] = bottom_col
                     
-            GridTransformations.update_piece_positions(front_face)
+            GridTransformations.update_piece_positions(front_face, is_test=is_test)
                 
             return front_face.grid
         
-        def transform_top_face(current_front, is_rotate_down=True, is_right_col=True):
+        def transform_top_face(current_front, is_rotate_down=True, is_right_col=True, is_test=False):
             top_face = current_front.top.copy()
             old_face = top_face.copy()
             
@@ -95,11 +96,11 @@ class GridTransformations:
                     front_left_col = front_face.grid[:,FacePositions.LEFT_COL].copy()
                     top_face.grid[:,FacePositions.LEFT_COL] = front_left_col
                     
-            GridTransformations.update_piece_positions(top_face)
+            GridTransformations.update_piece_positions(top_face, is_test=is_test)
 
             return top_face.grid
         
-        def transform_bottom_face(current_front, is_rotate_down=True, is_right_col=True):
+        def transform_bottom_face(current_front, is_rotate_down=True, is_right_col=True, is_test=False):
             bottom_face = current_front.bottom.copy()
             old_face = bottom_face.copy()
             
@@ -122,11 +123,11 @@ class GridTransformations:
                     back_right_col = back_face.grid[:,FacePositions.RIGHT_COL].copy()
                     bottom_face.grid[:,FacePositions.LEFT_COL] = np.flip(back_right_col)
                     
-            GridTransformations.update_piece_positions(bottom_face)
+            GridTransformations.update_piece_positions(bottom_face, is_test=is_test)
             
             return bottom_face.grid
         
-        def transform_back_face(current_front, is_rotate_down=True, is_right_col=True):
+        def transform_back_face(current_front, is_rotate_down=True, is_right_col=True, is_test=False):
             back_face = current_front.opposite.copy()
             old_face = back_face.copy()
             
@@ -149,20 +150,20 @@ class GridTransformations:
                     top_left_col = top_face.grid[:,FacePositions.LEFT_COL].copy()
                     back_face.grid[:,FacePositions.RIGHT_COL] = np.flip(top_left_col)
                     
-            GridTransformations.update_piece_positions(back_face)
+            GridTransformations.update_piece_positions(back_face, is_test=is_test)
             
             return back_face.grid
         
     
     class RowRightAndLeft:
         
-        def transform_top_face(current_front, is_rotate_left=True):
-            return GridTransformations.LeftAndRight.transform_top_face(current_front, Axes.VERTICAL, is_left=is_rotate_left)
+        def transform_top_face(current_front, is_rotate_left=True, is_test=False):
+            return GridTransformations.LeftAndRight.transform_top_face(current_front, Axes.VERTICAL, is_left=is_rotate_left, is_test=is_test)
         
-        def transform_bottom_face(current_front, is_rotate_left=True):
-            return GridTransformations.LeftAndRight.transform_bottom_face(current_front, Axes.VERTICAL, is_left=is_rotate_left)
+        def transform_bottom_face(current_front, is_rotate_left=True, is_test=False):
+            return GridTransformations.LeftAndRight.transform_bottom_face(current_front, Axes.VERTICAL, is_left=is_rotate_left, is_test=is_test)
         
-        def transform_front_back_left_right_faces(current_front, orientation, is_rotate_left=True, is_top_row=True):
+        def transform_front_back_left_right_faces(current_front, orientation, is_rotate_left=True, is_top_row=True, is_test=False):
             if orientation == Orientation.FRONT:
                 face = current_front.copy()
             elif orientation == Orientation.BACK:
@@ -193,16 +194,15 @@ class GridTransformations:
                     left_bottom_row = left_face.grid[FacePositions.BOTTOM_ROW].copy()
                     face.grid[FacePositions.BOTTOM_ROW] = left_bottom_row
                     
-            GridTransformations.update_piece_positions(face)
+            GridTransformations.update_piece_positions(face, is_test=is_test)
             
             return face.grid
         
-    
     class UpAndDown:
         
         # * GRID TRANSFORMATIONS FOR UP & DOWN ROTATIONS
         
-        def transform_left_face(current_front, is_rotate_down=True):
+        def transform_left_face(current_front, is_rotate_down=True, is_test=False):
             left_face = current_front.left.copy()
             old_face = left_face.copy()
             
@@ -222,11 +222,11 @@ class GridTransformations:
                 left_face.grid[FacePositions.TOP_ROW] = old_right_col
                 left_face.grid[FacePositions.BOTTOM_ROW] = old_left_col
                 
-            GridTransformations.update_piece_positions(left_face)
+            GridTransformations.update_piece_positions(left_face, is_test=is_test)
                 
             return left_face.grid
         
-        def transform_right_face(current_front, is_rotate_down):
+        def transform_right_face(current_front, is_rotate_down, is_test=False):
             right_face = current_front.right.copy()
             old_face = right_face.copy()
             
@@ -246,11 +246,11 @@ class GridTransformations:
                 right_face.grid[FacePositions.TOP_ROW] = np.flip(old_left_col)
                 right_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_right_col)
                 
-            GridTransformations.update_piece_positions(right_face)
+            GridTransformations.update_piece_positions(right_face, is_test=is_test)
                 
             return right_face.grid
         
-        def transform_back_face(current_front, is_rotate_down=True):
+        def transform_back_face(current_front, is_rotate_down=True, is_test=False):
             back_face = current_front.opposite.copy()
             old_face = back_face.copy()
             
@@ -270,11 +270,11 @@ class GridTransformations:
                 back_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
                 back_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
                 
-            GridTransformations.update_piece_positions(back_face)
+            GridTransformations.update_piece_positions(back_face, is_test=is_test)
             
             return back_face.grid
         
-        def transform_top_face(current_front, is_rotate_down=True):
+        def transform_top_face(current_front, is_rotate_down=True, is_test=False):
             top_face = current_front.top.copy()
             old_face = top_face.copy()
             
@@ -289,11 +289,11 @@ class GridTransformations:
                 top_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
                 top_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
                 
-            GridTransformations.update_piece_positions(top_face)
+            GridTransformations.update_piece_positions(top_face, is_test=is_test)
             
             return top_face.grid
         
-        def transform_bottom_face(current_front, is_rotate_down=True):
+        def transform_bottom_face(current_front, is_rotate_down=True, is_test=False):
             bottom_face = current_front.bottom.copy()
             old_face = bottom_face.copy()
             
@@ -308,7 +308,7 @@ class GridTransformations:
                 bottom_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
                 bottom_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
                 
-            GridTransformations.update_piece_positions(bottom_face)
+            GridTransformations.update_piece_positions(bottom_face, is_test=is_test)
             
             return bottom_face.grid
         
@@ -317,7 +317,7 @@ class GridTransformations:
         
         # * GRID TRANSFORMATIONS FOR LEFT & RIGHT ROTATIONS
         
-        def transform_left_face(current_front, axis, is_left=True):
+        def transform_left_face(current_front, axis, is_left=True, is_test=False):
             left_face = current_front.left.copy()
             old_face = left_face.copy()
             
@@ -338,11 +338,11 @@ class GridTransformations:
                     left_face.grid[FacePositions.TOP_ROW] = np.flip(old_left_col)
                     left_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_right_col)
                     
-            GridTransformations.update_piece_positions(left_face)
+            GridTransformations.update_piece_positions(left_face, is_test=is_test)
             
             return left_face.grid
         
-        def transform_right_face(current_front, axis, is_left=True):
+        def transform_right_face(current_front, axis, is_left=True, is_test=False):
             right_face = current_front.right.copy()
             old_face = right_face.copy()
             
@@ -363,11 +363,11 @@ class GridTransformations:
                     right_face.grid[FacePositions.TOP_ROW] = np.flip(old_left_col)
                     right_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_right_col)
                     
-            GridTransformations.update_piece_positions(right_face)
+            GridTransformations.update_piece_positions(right_face, is_test=is_test)
             
             return right_face.grid
         
-        def transform_front_face(current_front, axis, is_left=True):
+        def transform_front_face(current_front, axis, is_left=True, is_test=False):
             front_face = current_front.copy()
             old_face = front_face.copy()
             
@@ -388,11 +388,11 @@ class GridTransformations:
                     front_face.grid[FacePositions.TOP_ROW] = np.flip(old_left_col)
                     front_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_right_col)
                     
-            GridTransformations.update_piece_positions(front_face)
+            GridTransformations.update_piece_positions(front_face, is_test=is_test)
             
             return front_face.grid
         
-        def transform_back_face(current_front, axis, is_left=True):
+        def transform_back_face(current_front, axis, is_left=True, is_test=False):
             back_face = current_front.opposite.copy()
             old_face = back_face.copy()
             
@@ -413,11 +413,11 @@ class GridTransformations:
                     back_face.grid[FacePositions.TOP_ROW] = (old_right_col)
                     back_face.grid[FacePositions.BOTTOM_ROW] = (old_left_col)
                     
-            GridTransformations.update_piece_positions(back_face)
+            GridTransformations.update_piece_positions(back_face, is_test=is_test)
 
             return back_face.grid
         
-        def transform_top_face(current_front, axis, is_left=True):
+        def transform_top_face(current_front, axis, is_left=True, is_test=False):
             top_face = current_front.top.copy()
             old_face = top_face.copy()
             
@@ -449,11 +449,11 @@ class GridTransformations:
                     top_face.grid[FacePositions.TOP_ROW] = np.flip(old_left_col)
                     top_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_right_col)
                     
-            GridTransformations.update_piece_positions(top_face)
+            GridTransformations.update_piece_positions(top_face, is_test=is_test)
             
             return top_face.grid
         
-        def transform_bottom_face(current_front, axis, is_left=True):
+        def transform_bottom_face(current_front, axis, is_left=True, is_test=False):
             bottom_face = current_front.bottom.copy()
             old_face = bottom_face.copy()
             
@@ -473,7 +473,7 @@ class GridTransformations:
                 bottom_face.grid[FacePositions.TOP_ROW] = np.flip(old_left_col)
                 bottom_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_right_col)
                 
-            GridTransformations.update_piece_positions(bottom_face)
+            GridTransformations.update_piece_positions(bottom_face, is_test=is_test)
                     
             return bottom_face.grid
     
@@ -482,7 +482,7 @@ class GridTransformations:
         
         # * GRID TRANSFORMATIONS FOR CUBE INVERSION
         
-        def transform_left_face(current_front, axis):
+        def transform_left_face(current_front, axis, is_test=False):
             left_face = current_front.left.copy()
             old_face = left_face.copy()
             
@@ -497,11 +497,11 @@ class GridTransformations:
                 left_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
                 left_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
                 
-            GridTransformations.update_piece_positions(left_face)
+            GridTransformations.update_piece_positions(left_face, is_test=is_test)
             
             return left_face.grid
         
-        def transform_right_face(current_front, axis):
+        def transform_right_face(current_front, axis, is_test=False):
             right_face = current_front.right.copy()
             old_face = right_face.copy()
             
@@ -516,11 +516,11 @@ class GridTransformations:
                 right_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
                 right_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
                 
-            GridTransformations.update_piece_positions(right_face)
+            GridTransformations.update_piece_positions(right_face, is_test=is_test)
         
             return right_face.grid
         
-        def transform_top_face(current_front, axis):
+        def transform_top_face(current_front, axis, is_test=False):
             top_face = current_front.top.copy()
             old_face = top_face.copy()
             
@@ -540,11 +540,11 @@ class GridTransformations:
                 top_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
                 top_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
                 
-            GridTransformations.update_piece_positions(top_face)
+            GridTransformations.update_piece_positions(top_face, is_test=is_test)
                 
             return top_face.grid
                 
-        def transform_bottom_face(current_front, axis):
+        def transform_bottom_face(current_front, axis, is_test=False):
             bottom_face = current_front.bottom.copy()
             old_face = bottom_face.copy()
             
@@ -564,11 +564,11 @@ class GridTransformations:
                 bottom_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
                 bottom_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
                 
-            GridTransformations.update_piece_positions(bottom_face)
+            GridTransformations.update_piece_positions(bottom_face, is_test=is_test)
             
             return bottom_face.grid
         
-        def transform_front_face(current_front, axis):
+        def transform_front_face(current_front, axis, is_test=False):
             front_face = current_front.copy()
             old_face = front_face.copy()
             
@@ -583,11 +583,11 @@ class GridTransformations:
                 front_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
                 front_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
                 
-            GridTransformations.update_piece_positions(front_face)
+            GridTransformations.update_piece_positions(front_face, is_test=is_test)
             
             return front_face.grid
         
-        def transform_back_face(current_front, axis):
+        def transform_back_face(current_front, axis, is_test=False):
             back_face = current_front.opposite.copy()
             old_face = back_face.copy()
             
@@ -602,7 +602,7 @@ class GridTransformations:
                 back_face.grid[FacePositions.TOP_ROW] = np.flip(old_bottom_row)
                 back_face.grid[FacePositions.BOTTOM_ROW] = np.flip(old_top_row)
                 
-            GridTransformations.update_piece_positions(back_face)
+            GridTransformations.update_piece_positions(back_face, is_test=is_test)
                 
             return back_face.grid
         
@@ -818,7 +818,6 @@ class FaceTransformations:
                     face.left = old_face.back
                     face.right = old_face.front
             else:
-                # TODO: Have to add another if statement to handle bottom face (not same updates as for top face)
                 if is_left:
                     if not is_top:
                         face.right = old_face.back

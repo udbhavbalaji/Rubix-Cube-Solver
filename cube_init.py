@@ -1,15 +1,14 @@
 """
-This file holds the code to initiailize a random cube, as well as ensure that the cube can be recreated in real life.
-POSSIBLE ADDITIONS: Ability for user to enter a cube configuration to test out the program
+This module contains the RubixCube, Face, Piece, EdgePiece and CornerPiece classes. It creates a Rubix Cube, 
+allowing all possible operations that can be done to a Rubix Cube in real life.
 """
 
 import numpy as np
-from Constraints import Colours, Axes, PieceType, PossibleCornerPieces, FacePositions, Orientation, PossibleOperations
-from Transformations import GridTransformations, FaceTransformations
-import Predicates
+from Constraints import Colours, Axes, PieceType, FacePositions, Orientation, PossibleOperations
 from Operations import OPERATIONS
 
 class Cube():
+    
     """
     This is a class representing the Rubix Cube. A cube has 6 faces (type=FaceObject). It is initialized with the blue 
     face in front, red face on the left, orange face on the right, green face on the back, white face 
@@ -40,9 +39,10 @@ class Cube():
         red_face: Pointer to the red face in the cube
         orange_face: Pointer to the orange face in the cube
         green_face: Pointer to the green face in the cube
-        _kwargs_dict: Dictionary mapping possible moves to operation functions and corresponding kwargs
+        _kwargs_dict: Dictionary property mapping possible moves to operation functions and corresponding kwargs
         
     Instance Methods:
+        copy: Creates a duplicate instance of the Cube class with the same values
         initialize_random_cube: Creates the cube structure
         init_kwargs: Initializes operation functions and corresponding kwargs
         get_kwargs: Decorator method that maps the required operation function and kwargs dict based on the requested operation
@@ -469,7 +469,52 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
 
 class Face:
     
-    def __init__(self, colour=None, right=None, left=None, top=None, bottom=None, front=None, back=None, opposite=None, is_side_face=True, is_copy=False, grid=None):
+    """
+    This is a class representing a Face of a Rubix Cube (type=CubeType). Each face has a 3 X 3 grid
+    representing each of the 9 pieces (type=PieceType) on the face of a Rubix Cube. The Piece().colour
+    is set to the face's center colour (since the center piece cannot be moved from the face). 
+    
+    Instance Attributes:
+        center_colour (str, optional): String literal assigning a colour to the face's center piece. Defaults to None
+        right (Face, optional): Face instance that is to the right of the current face in the Cube class. Defaults to None
+        left (Face, optional): Face instance that is to the left of the current face in the Cube class. Defaults to None
+        top (Face, optional): Face instance that is to the top of the current face in the Cube class. Becomes None if face is not a side face. Defaults to None
+        bottom (Face, optional): Face instance that is to the bottom of the current face in the Cube class. Becomes None if face is not a side face. Defaults to None
+        front (Face, optional): Face instance that is to the front of the current face in the Cube class. Becomes None if face is a side face. Defaults to None
+        back (Face, optional): Face instance that is to the back of the current face in the Cube class. Becomes None if face is a side face. Defaults to None
+        opposite (Face, optional): Face instance that points to the opposite face to the current face in the Cube class. Defaults to None
+        is_side_face (bool, optional): bool value storing if the current face is a side face. Defaults to None
+        grid (numpy.array, optional): 3 X 3 matrix that stores the pieces for the current face. Defaults to None
+        
+    Instance Methods:
+        copy: Creates a duplicate instance of the Face class with the same values
+        initialize_pieces: Initializes the face instance's grid
+    """
+    
+    def __init__(self, 
+                 colour=None, right=None, left=None, top=None, bottom=None, 
+                 front=None, back=None, opposite=None, is_side_face=True, 
+                 is_copy=False, grid=None):
+        """
+        Constructor method for the Face class.
+
+        Args:
+            colour (str, optional): String literal representing the colour of the face. Defaults to None.
+            right (Face, optional): Face instance that is to the right of the current face in the Cube class. Defaults to None.
+            left (Face, optional): Face instance that is to the left of the current face in the Cube class. Defaults to None.
+            top (Face, optional): Face instance that is to the top of the current face in the Cube class. Becomes None 
+                                  if current face instance is not a side face in the Cube class. Defaults to None.
+            bottom (Face, optional): Face instance that is to the bottom of the current face in the Cube class. Becomes None 
+                                  if current face instance is not a side face in the Cube class. Defaults to None.
+            front (Face, optional): Face instance that is to the front of the current face in the Cube class. Becomes None 
+                                  if the current face instance is a side face in the Cube class. Defaults to None.
+            back (Face, optional): Face instance that is to the back of the current face in the Cube class. Becomes None 
+                                  if the current face instance is a side face in the Cube class. Defaults to None.
+            opposite (Face, optional): Face instance that is opposite to the current face in the Cube class. Defaults to None.
+            is_side_face (bool, optional): bool value storing if the current face instance is a side face. Defaults to True.
+            is_copy (bool, optional): bool value storing if the current Face instance is a copied version. Defaults to False.
+            grid (numpy.array, optional): 3 X 3 matrix representing the pieces on the current Face instance. Defaults to None.
+        """
         self.center_colour = colour
         self.right = right
         self.left = left
@@ -483,12 +528,24 @@ class Face:
         if is_copy:
             self.grid = grid
         else:
-            self.grid = self.initialize_center_pieces()
+            self.grid = self.initialize_pieces()
         
     def copy(self):
+        """
+        This method creates and returns a duplicate Face instance with all attributes values copied.
+
+        Returns:
+            Face: Newly created Face instance with all attribute values copied
+        """
         return Face(self.center_colour, self.right, self.left, self.top, self.bottom, self.front, self.back, self.opposite, self.is_side_face, is_copy=True, grid=self.grid.copy())
         
-    def initialize_center_pieces(self):
+    def initialize_pieces(self):
+        """
+        This method initializes the grid for the current face instance. It is represented by a 3 X 3 matrix.
+
+        Returns:
+            numpy.array: 3 X 3 matrix/array representing the grid for the current face instance.
+        """
         ## Creating center piece
         center_piece = Piece(FacePositions.MID_CENTER, self, PieceType.CENTER)
         colour = center_piece.colour[0]
@@ -505,16 +562,7 @@ class Face:
         bottom_left_piece = CornerPiece(FacePositions.BOTTOM_LEFT, self, PieceType.CORNER)
         bottom_right_piece = CornerPiece(FacePositions.BOTTOM_RIGHT, self, PieceType.CORNER)
         
-        # if self.is_test:
-            
-        #     grid = [
-        #         [1, 2, 3],
-        #         [4, 5, 6],
-        #         [7, 8, 9]
-        #     ]
-        
-        # else:
-        
+        ## Creating the grid
         grid = [
             [top_left_piece, top_center_piece, top_right_piece],
             [mid_left_piece, center_piece, mid_right_piece],
@@ -546,7 +594,25 @@ class Column:
 
 class Piece:
     
+    """
+    This is a class that represents each piece on each face of the Rubix Cube.
+    
+    Instance Attributes:
+        face_position (tuple): a tuple representing the index for the piece in the current face instance's grid
+        face (Face): a pointer to the piece's current face instance
+        _colour (str): a string property that stores the colour that is on the current piece instance
+        _piece_type (str): a string property that stores the piece's type (Center, Edge, Corner)
+    """
+    
     def __init__(self, face_position, face, piece_type):
+        """
+        Constructor method for the Piece Class.
+
+        Args:
+            face_position (tuple): tuple containing index position of current piece instance in current face instance
+            face (Face): Face instance that contains the current Piece instance
+            piece_type (str): String literal storing the type of piece the current Piece instance is
+        """
         self.face_position = face_position
         self.face = face
         self._colour = self.face.center_colour
@@ -554,40 +620,130 @@ class Piece:
         
     @property
     def colour(self):
+        """
+        This is a getter method for the Piece()._colour property. It returns the string literal stored in
+        Piece()._colour.
+
+        Returns:
+            str: String literal storing the piece instance's colour
+        """
         return self._colour
     
     @property
     def piece_type(self):
+        """
+        This is a getter method for the Piece()._piece_type property. It returns the string literal stored
+        in Piece()._piece_type. 
+
+        Returns:
+            str: String literal storing the piece instance's type
+        """
         return self._piece_type
         
 
 class EdgePiece(Piece):
     
-    def __init__(self, face_position, face, piece_type, complement=()):
+    """
+    This is a class that represents each edge piece on each face of the Rubix Cube. This class inherits from
+    the Piece class, inheriting some properties and attributes.
+    
+    Instance Attributes:
+        face_position (tuple): a tuple representing the index for the piece in the current face instance's grid
+        face (Face): a pointer to the piece's current face instance
+        _colour (str): a string property that stores the colour that is on the current piece instance
+        _piece_type (str): a string property that stores the piece's type (Center, Edge, Corner)
+        _complement (EdgePiece): a pointer property to the Piece instance that is the current Piece instance's complement
+    """
+    
+    def __init__(self, face_position, face, piece_type, complement=None):
+        """
+        Constructor method for the EdgePiece class.
+
+        Args:
+            face_position (tuple): tuple containing index position of current piece instance in current face instance
+            face (Face): Face instance that contains the current Piece instance
+            piece_type (str): String literal storing the type of piece the current Piece instance is
+            complement (Piece, optional): A Piece instance pointing to the complement Piece instance. Defaults to None.
+        """
         super().__init__(face_position, face, piece_type)
         self._complement = complement
         
     @property
     def complement(self):
+        """
+        This is a getter method for the EdgePiece()._complement property. It returns the Piece object instance stored in
+        CornerPiece()._complement.
+
+        Returns:
+            Piece: a Piece object property containing the Piece instance that is the current 
+                   Piece instance's complement
+        """
         return self._complement
     
     @complement.setter
     def complement(self, new_complement):
+        """
+        This is a setter method for the EdgePiece()._complement property. It overrides the current value in
+        EdgePiece()._complement with the value in new_complement.
+
+        Args:
+            new_complements (Piece): a Piece object property containing the Piece instance that is the current
+                                     Piece instance's complement.
+        """
         self._complement = new_complement
         
         
 class CornerPiece(Piece):
     
+    """
+    This is a class that represents each corner piece on each face of the Rubix Cube. This class inherits from
+    the Piece class, inheriting some properties and attributes.
+    
+    Instance Attributes:
+        face_position (tuple): a tuple representing the index for the piece in the current face instance's grid
+        face (Face): a pointer to the piece's current face instance
+        _colour (str): a string property that stores the colour that is on the current piece instance
+        _piece_type (str): a string property that stores the piece's type (Center, Edge, Corner)
+        _complements (tuple): a tuple property containing pointers to the Piece instances that are the 
+                              current Piece instance's complements
+    """
+    
     def __init__(self, face_position, face, piece_type, complements=()):
+        """
+        Constructor method for the CornerPiece class.
+
+        Args:
+            face_position (tuple): tuple containing index position of current piece instance in current face instance
+            face (Face): Face instance that contains the current Piece instance
+            piece_type (str): String literal storing the type of piece the current Piece instance is
+            complements (tuple, optional): A tuple containing Piece instances that point to the current piece 
+                                           instance's complements. Defaults to ().
+        """
         super().__init__(face_position, face, piece_type)
         self._complements = complements
         
     @property
     def complements(self):
+        """
+        This is a getter method for the CornerPiece()._complements property. It returns the tuple stored in
+        CornerPiece()._complements.
+
+        Returns:
+            tuple: a tuple property containing pointers to the Piece instances that are the current 
+                   Piece instance's complements
+        """
         return self._complements
     
     @complements.setter
     def complements(self, new_complements):
+        """
+        This is a setter method for the CornerPiece()._complements property. It overrides the current value in
+        CorenerPiece()._complements with the value in new_complements.
+
+        Args:
+            new_complements (tuple): a tuple containing pointers to the Piece instances that are the current
+                                     Piece instance's complements.
+        """
         self._complements = new_complements
     
     

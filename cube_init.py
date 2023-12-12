@@ -2,12 +2,15 @@
 This module contains the RubixCube, Face, Piece, EdgePiece and CornerPiece classes. It creates a Rubix Cube, 
 allowing all possible operations that can be done to a Rubix Cube in real life.
 """
-
+# Importing installed modules
 import numpy as np
-from Constraints import Colours, Axes, PieceType, FacePositions, Orientation, PossibleOperations
-from Operations import OPERATIONS
+# Importing built-in modules
+import random
+# Importing (from) local modules
+from Constraints import Axes, Colours, FacePositions, Orientation, PieceType, PossibleOperations
+from Operations import shuffle_cube, OPERATIONS
 
-class Cube():
+class RubixCube():
     
     """
     This is a class representing the Rubix Cube. A cube has 6 faces (type=FaceObject). It is initialized with the blue 
@@ -161,7 +164,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         
         for i in range(len(PossibleOperations.MOVES)):
             kwargs = kwargs_template.copy()
-            if i < 8 or i == (len(PossibleOperations.MOVES)-1):
+            if i < 8 or i > 15:
                 kwargs['cube'] = self
                 if i in [0, 1, 6]:
                     kwargs['axis'] = Axes.VERTICAL
@@ -204,7 +207,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         Returns:
             Cube: A copy of the current instance is created and returned.
         """
-        return Cube(self.current_perspective, self.initial_perspective, self.blue_face, self.white_face, self.yellow_face, \
+        return RubixCube(self.current_perspective, self.initial_perspective, self.blue_face, self.white_face, self.yellow_face, \
                     self.red_face, self.orange_face, self.green_face, is_copy=True)
     
     def initialize_random_cube(self):
@@ -388,8 +391,10 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
                 verbose (bool, optional): bool value that determines if the operation should output logs. Defaults to True.
             """
             shift, kwargs = self.kwargs_dict[operation]
-            shift(**kwargs)
+            op_stack = shift(**kwargs)
             original_func(self, operation, verbose)
+            if op_stack is not None:
+                return op_stack
         
         return perform_operation
         
@@ -748,10 +753,8 @@ class CornerPiece(Piece):
     
     
 if __name__ == "__main__":
-    cube1 = Cube()
-    cube1.move(PossibleOperations.ROTATE_DOWN)
-    cube1.move(PossibleOperations.ROTATE_LEFT_HORIZONTALLY)
-    print(cube1)
-    cube1.move(PossibleOperations.RESET_PERSPECTIVE)
-    print(cube1)
+    cube = RubixCube()
+    op_stack = cube.move(PossibleOperations.SHUFFLE_CUBE)
+    print(cube)
+    print(op_stack)
     

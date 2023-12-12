@@ -1,7 +1,36 @@
-import numpy as np
+import random
+import math
 import Predicates
 from Transformations import FaceTransformations, GridTransformations
 from Constraints import Axes, FacePositions, Orientation, PossibleOperations
+
+
+def shuffle_cube(cube=None, axis=None, current_front=None):
+    op_stack = []
+    num_operations = round(math.pow(random.randint(10, 100), (random.random()*2)))
+    print(num_operations)
+    rotations = PossibleOperations.MOVES[:8]
+    shifts = PossibleOperations.MOVES[8:16]
+    for i in range(30):
+        if i%10 == 0:
+            random_index = random.randrange(0, len(rotations))
+            operation = rotations[random_index]
+        else:
+            random_index = random.randrange(0, len(shifts))
+            operation = shifts[random_index]
+            
+        print(operation)
+
+        op, op_kwargs = cube.kwargs_dict[operation]
+        # print(op, op_kwargs)
+        try:
+            op(**op_kwargs)
+        except:
+            continue
+        op_stack.append(operation)
+    
+    return op_stack
+
 
 class Shifts:
     
@@ -515,11 +544,10 @@ class Rotations:
     def reset_perspective(cube=None, axis=None, current_front=None):
         iters = 0
         while True:
-            blue_face_orientation = cube.get_orientation()
             if Predicates.FacePredicates.is_correct_perspective(cube):
                 break
             else:
-                orientation = cube.get_orientation()
+                orientation = Rotations.get_orientation(cube)
                 if orientation == Orientation.TOP:
                     cube.move(PossibleOperations.ROTATE_DOWN)
                 elif orientation == Orientation.BOTTOM:
@@ -582,9 +610,10 @@ class Rotations:
     INVERT_CUBE_HORIZONTALLY = invert_cube
     RESET_PERSPECTIVE = reset_perspective
     
-    
+SHUFFLE_CUBE = shuffle_cube    
+
 OPERATIONS = [Rotations.ROTATE_LEFT_VERTICALLY, Rotations.ROTATE_RIGHT_VERTICALLY, Rotations.ROTATE_UP, Rotations.ROTATE_DOWN, 
               Rotations.ROTATE_LEFT_HORIZONTALLY, Rotations.ROTATE_RIGHT_HORIZONTALLY, Rotations.INVERT_CUBE_VERTICALLY, Rotations.INVERT_CUBE_HORIZONTALLY,
               Shifts.RIGHT_COL_UP, Shifts.LEFT_COL_UP, Shifts.RIGHT_COL_DOWN, Shifts.LEFT_COL_DOWN,
               Shifts.TOP_ROW_LEFT, Shifts.TOP_ROW_RIGHT, Shifts.BOTTOM_ROW_LEFT, Shifts.BOTTOM_ROW_RIGHT,
-              Rotations.RESET_PERSPECTIVE]
+              Rotations.RESET_PERSPECTIVE, SHUFFLE_CUBE]

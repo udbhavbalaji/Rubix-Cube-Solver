@@ -10,13 +10,70 @@ import Predicates
 from Operations import OPERATIONS
 
 class Cube():
+    """
+    This is a class representing the Rubix Cube. A cube has 6 faces (type=FaceObject). It is initialized with the blue 
+    face in front, red face on the left, orange face on the right, green face on the back, white face 
+    on the top and yellow face on the bottom.
+    
+    All side faces (Front, Left, Right, Back) have Face().top set as the top (white) face and Face().bottom set as the 
+    bottom (yellow) face. Additionally, for all side faces, accessing the left/right attribute 4 times will bring you back to
+    the initial perspective (hence, making it cyclic). The top (white) and bottom (yellow) faces have Face().top and 
+    Face().bottom set to None. To correctly map their representation in the cube, they have Face().front = the current 
+    front face and Face().back = the current back face.
+    
+    All faces have a 3 X 3 grid holding pieces (type=PieceObject). These are stored in a numpy array. For all side faces, 
+    the orientation is identical to face orientations discussed above. For the top (white) face, the top row corresponds to
+    the edge Face().back (green), the left and right columns correspond to edges Face().left (red) and Face().right (orange) and 
+    the bottom row corresponds to the edge Face().front (blue). Similarly, for the bottom (yellow) face, the top row corresponds to
+    the edge Face().front (blue), the left and right columns correspond to edges Face().left (red) and Face().right (orange) and 
+    the bottom row corresponds to the edge Face().back (green).
+    
+    Class Attributes:
+        NUM_FACES (int): Literal value to store number of faces in the Rubix Cube
+        COLOURS (list): List of face colour literals
+
+    Instance Attributes:
+        current_perspective: Pointer to the Face Object that is currently in front
+        blue_face: Pointer to the blue face in the cube
+        white_face: Pointer to the white face in the cube
+        yellow_face: Pointer to the yellow face in the cube
+        red_face: Pointer to the red face in the cube
+        orange_face: Pointer to the orange face in the cube
+        green_face: Pointer to the green face in the cube
+        _kwargs_dict: Dictionary mapping possible moves to operation functions and corresponding kwargs
+        
+    Instance Methods:
+        initialize_random_cube: Creates the cube structure
+        init_kwargs: Initializes operation functions and corresponding kwargs
+        get_kwargs: Decorator method that maps the required operation function and kwargs dict based on the requested operation
+        move: Performs the specified operation
+        assign_complements: Assigns corresponding complement value for each piece on a face
+        get_2D_cube_grid: Translates each face's grid into a 2D representation for graphing
+    """
     
     NUM_FACES = 6
     # $ Face Order: Front, Right, Back, Left, Top, Bottom
     # $ Colour Order: Blue, Orange, Green, Red, White, Yellow
     COLOURS = [Colours.BLUE, Colours.ORANGE, Colours.GREEN, Colours.RED, Colours.WHITE, Colours.YELLOW]
     
-    def __init__(self, current=None, initial=None, blue=None, white=None, yellow=None, red=None, orange=None, green=None, is_copy=False, shift=None):
+    def __init__(self, 
+                 current=None, initial=None, blue=None, white=None, 
+                 yellow=None, red=None, orange=None, green=None, 
+                 is_copy=False):
+        """
+        Constructor method for the Cube class.
+
+        Args:
+            current (Face, optional): Face instance that is currently in front. Defaults to None.
+            initial (_type_, optional): _description_. Defaults to None.
+            blue (Face, optional): Face instance for the blue face. Defaults to None.
+            white (Face, optional): Face instance for the white face. Defaults to None.
+            yellow (Face, optional): Face instance for the yellow face. Defaults to None.
+            red (Face, optional): Face instance for the red face. Defaults to None.
+            orange (Face, optional): Face instance for the orange face. Defaults to None.
+            green (Face, optional): Face instance for the green face. Defaults to None.
+            is_copy (bool, optional): bool to show if current Cube object is copied from another Cube object. Defaults to False.
+        """
         self.current_perspective = current
         self.initial_perspective = initial
         
@@ -35,6 +92,36 @@ class Cube():
         self.kwargs_dict = self.init_kwargs()
                         
     def __str__(self):
+        """
+        This method is called to return the string representation of the cube. It is represented as a 2D grid, 
+        as shown below.
+        
+        Every face's grid = [[1, 2, 3],
+                             [4, 5, 6],
+                             [7, 8, 9]]
+                              
+        The output representation is as follows:
+        
+             Left Face
+              _______   Bottom Face
+              |3 2 1|   /
+              |6 5 4|  /
+              |9 8 7| /
+        _____________L___________
+        |1 4 7|1 4 7|9 6 3|1 4 7|
+Front   |2 5 8|2 5 8|8 5 2|2 5 8| Top
+Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
+        -------------------------
+              |7 8 9|   \
+              |4 5 6|    \
+              |1 2 3|    Back Face
+              -------
+             Right Face
+        
+
+        Returns:
+            output (str): A string that is formatted to output the above structure
+        """
         front = self.current_perspective.copy()
         
         left_grid = self.get_2D_cube_grid(front.left, Orientation.LEFT)
@@ -57,6 +144,14 @@ class Cube():
         return output
             
     def init_kwargs(self):
+        """
+        This method initializes the operation functions and corresponding kwargs for each of the 
+        possible operations.
+
+        Returns:
+            kwargs_dict (dict): A dictionary containing tuples for each possible operation. The 
+                                tuple contains the operation function and the corresponding kwargs.
+        """
         kwargs_template = {
             'cube': None,
             'axis': None,
@@ -82,10 +177,24 @@ class Cube():
             
     @property
     def kwargs_dict(self):
+        """
+        This is a getter method for the property Cube().kwargs_dict. It returns the dict that is stored in
+        Cube()._kwargs_dict. 
+
+        Returns:
+            dict: Returns the dict stored in Cube()._kwargs_dict
+        """
         return self._kwargs_dict
     
     @kwargs_dict.setter
     def kwargs_dict(self, new_dict):
+        """
+        This is a setter method to internally re-assign the property (if required). It overrides the current dict
+        withnew_dict.
+
+        Args:
+            new_dict (dict): New dict containing kwargs for all possible operations.
+        """
         self._kwargs_dict = new_dict
     
     def copy(self):
@@ -100,16 +209,50 @@ class Cube():
     
     def initialize_random_cube(self):
         """
-        * This method initializes the Rubix Cube. The faces are created, edges are joined, and positional attributes assigned.
-        ! So far, I've done initializing the cube.
-        TODO: Complete all possible operations (rotations and movements)
-        TODO: Finish reset perspective
-        TODO: Shuffle the cube (multiple operations)
-        * More documentation will follow
+        This method initializes the Rubix Cube. The faces are created, edges are joined and positional attributes 
+        assigned. All complements values are assigned for each piece (type=PieceType) in each face (type=FaceType).
         
-        @params: None
-        @modifies: Cube().__getattrs__.* - All attributes in Cube()
-        @returns: None
+        Side Faces Initialization:
+                                               
+                                             (Top)
+                                    (Left Col)   (Right Col)
+                                             ^   ^
+                                             |   |
+                                            _______
+                                            |1 2 3|-> (Top Row)
+                            (Left)          |4 5 6|                  (Right)
+                                            |7 8 9|-> (Bottom Row)
+                                            -------
+                                            
+                                            (Bottom)
+                                            
+        Top Face Initialization:
+                                              
+                                             (Back)
+                                    (Left Col)   (Right Col)
+                                             ^   ^
+                                             |   |
+                                            _______
+                                            |1 2 3|-> (Top Row)
+                            (Left)          |4 5 6|                  (Right)
+                                            |7 8 9|-> (Bottom Row)
+                                            -------
+                                            
+                                            (Front)
+                                            
+        Bottom Face Initialization:
+                                              
+                                             (Front)
+                                    (Left Col)   (Right Col)
+                                             ^   ^
+                                             |   |
+                                            _______
+                                            |1 2 3|-> (Top Row)
+                            (Left)          |4 5 6|                  (Right)
+                                            |7 8 9|-> (Bottom Row)
+                                            -------
+                                            
+                                            (Back)
         """
         
         #* Creating the faces
@@ -177,28 +320,21 @@ class Cube():
         # Blue Face
         self.assign_complements(self.current_perspective)
         self.move(PossibleOperations.ROTATE_LEFT_VERTICALLY, verbose=False)
-        # self.rotate_left(Axes.VERTICAL)
         # Orange Face
         self.assign_complements(self.current_perspective)
         self.move(PossibleOperations.ROTATE_LEFT_VERTICALLY, verbose=False)
-        # self.rotate_left(Axes.VERTICAL)
         # Green Face
         self.assign_complements(self.current_perspective)
         self.move(PossibleOperations.ROTATE_LEFT_VERTICALLY, verbose=False)
-        # self.rotate_left(Axes.VERTICAL)
         # Red Face
         self.assign_complements(self.current_perspective)
         self.move(PossibleOperations.ROTATE_LEFT_VERTICALLY, verbose=False)
-        # self.rotate_left(Axes.VERTICAL)
         # Back to Blue Face
         self.move(PossibleOperations.ROTATE_DOWN, verbose=False)
-        # self.rotate_down()
         # White Face
         self.assign_complements(self.current_perspective)
         self.move(PossibleOperations.ROTATE_DOWN, verbose=False)
         self.move(PossibleOperations.ROTATE_DOWN, verbose=False)
-        # self.rotate_up()
-        # self.rotate_up()
         # Yellow Face
         self.assign_complements(self.current_perspective)
         
@@ -206,7 +342,19 @@ class Cube():
         self.move(PossibleOperations.RESET_PERSPECTIVE, verbose=False)
         # self.reset_perspective()
         
-    def assign_complements(self, face):        
+    def assign_complements(self, face):
+        """
+        This method assigns the complements for each piece in the face. EdgePiece and CornerPiece classes
+        have instance attributes (EdgePiece().complement and CornerPiece().complements respectively) that hold 
+        the pointers to the complement pieces.
+        
+        Example: Consider an edge piece in between the blue face and white face. According to current perspective,
+        this would make the top_center piece in the front (blue) face and the bottom_center piece in the top (white)
+        face complements. Similarly, in corner pieces, all 3 pieces that make up each corner are each others' complements.
+
+        Args:
+            face (Face): Face representing the current perspective of the cube
+        """
         ## Assigning complements of edge pieces
         face.grid[FacePositions.TOP_CENTER].complement = face.top.grid[FacePositions.BOTTOM_CENTER]
         face.grid[FacePositions.MID_LEFT].complement = face.left.grid[FacePositions.MID_RIGHT]
@@ -220,8 +368,25 @@ class Cube():
         face.grid[FacePositions.BOTTOM_RIGHT].complements = (face.bottom.grid[FacePositions.TOP_RIGHT], face.right.grid[FacePositions.BOTTOM_LEFT])
         
     def get_kwargs(original_func):
+        """
+        This is a decorator method that selects operation function and kwargs based on the requested operation.
+
+        Args:
+            original_func (func): Function to be executed within the wrapper function.
+            
+        Returns:
+            perform_operation (func): Wrapper function that performs the operation
+        """
         
         def perform_operation(self, operation, verbose=True):
+            """
+            This is the wrapper function for the get_kwargs decorator method. It obtains the correct operation function
+            and executes it before calling the Cube().move method.
+
+            Args:
+                operation (str): String literal representing a possible operation.
+                verbose (bool, optional): bool value that determines if the operation should output logs. Defaults to True.
+            """
             shift, kwargs = self.kwargs_dict[operation]
             shift(**kwargs)
             original_func(self, operation, verbose)
@@ -230,380 +395,27 @@ class Cube():
         
     @get_kwargs
     def move(self, operation, verbose=True):
+        """
+        This function performs the operation requested/specified.
+
+        Args:
+            operation (str): String literal representing a possible operation
+            verbose (bool, optional): bool value that determines if the operation should output logs. Defaults to True.
+        """
         if verbose:
             print(operation)
-    
-    # def rotate_left(self, axis):
-    #     """
-    #     * This method performs the operation of rotating the cube leftwards. It makes calls to get the 
-    #     * transformed faces of the cube. These values are then transferred into the existing Face object.
-        
-    #     @params: axis (ENUM) - The enum is defined in Constraints.Axes . Tells the program along which axis to rotate.
-    #     @modifies: Face().__getattrs__.* - All attribute values for each of the faces in the Cube object.
-    #     @returns: None
-    #     """
-    #     current = self.current_perspective
-        
-    #     if axis == Axes.VERTICAL:
-    #         print('ROTATING LEFT VERTICALLY')
-    #         ## Getting transformed Top & Bottom Faces
-    #         new_top_face = FaceTransformations.LeftAndRight.transform_top_bottom_faces(current, axis, is_top=True, is_left=True)
-    #         new_bottom_face = FaceTransformations.LeftAndRight.transform_top_bottom_faces(current, axis, is_top=False, is_left=True)
-            
-    #         ## Getting transformed Top & Bottom Grids
-    #         new_top_grid = GridTransformations.LeftAndRight.transform_top_face(current, axis, is_left=True)
-    #         new_bottom_grid = GridTransformations.LeftAndRight.transform_bottom_face(current, axis, is_left=True)
-            
-    #         ## Updating grid for each transformed face
-    #         new_top_face.grid = new_top_grid
-    #         new_bottom_face.grid = new_bottom_grid
-            
-    #         ## Changing perspective to right face
-    #         self.current_perspective = self.current_perspective.right
-            
-    #         ## Transferring transformed attribute values to original object
-    #         self.transfer_faces(self.current_perspective.top, new_top_face)
-    #         self.transfer_faces(self.current_perspective.bottom, new_bottom_face)
-    #     else:
-    #         print('ROTATING LEFT HORIZONTALLY')
-    #         ## Getting transformed Left & Right Faces
-    #         new_right_face = FaceTransformations.LeftAndRight.transform_right_face(current, is_left=True)
-    #         new_left_face = FaceTransformations.LeftAndRight.transform_left_face(current, is_left=True)
-            
-    #         ## Getting transformed Left & Right Grids
-    #         new_right_grid = GridTransformations.LeftAndRight.transform_right_face(current, axis, is_left=True)
-    #         new_left_grid = GridTransformations.LeftAndRight.transform_left_face(current, axis, is_left=True)
-            
-    #         ## Getting transformed Front & Back Faces
-    #         new_front_face = FaceTransformations.LeftAndRight.transform_front_back_faces(current, is_front=True, is_left=True)
-    #         new_back_face = FaceTransformations.LeftAndRight.transform_front_back_faces(current, is_front=False, is_left=True)
-            
-    #         ## Getting transformed Front & Back Grids
-    #         new_front_grid = GridTransformations.LeftAndRight.transform_front_face(current, axis, is_left=True)
-    #         new_back_grid = GridTransformations.LeftAndRight.transform_back_face(current, axis, is_left=True)
-            
-    #         ## Getting transformed Top & Bottom Faces
-    #         new_top_face = FaceTransformations.LeftAndRight.transform_top_bottom_faces(current, axis, is_top=True, is_left=True)
-    #         new_bottom_face = FaceTransformations.LeftAndRight.transform_top_bottom_faces(current, axis, is_top=False, is_left=True)
-            
-    #         ## Getting transformed Top & Bottom Faces
-    #         new_top_grid = GridTransformations.LeftAndRight.transform_top_face(current, axis, is_left=True)
-    #         new_bottom_grid = GridTransformations.LeftAndRight.transform_bottom_face(current, axis, is_left=True)
-            
-    #         ## Updating grid for each transformed face
-    #         new_left_face.grid = new_left_grid
-    #         new_right_face.grid = new_right_grid
-    #         new_front_face.grid = new_front_grid
-    #         new_back_face.grid = new_back_grid
-    #         new_top_face.grid = new_top_grid
-    #         new_bottom_face.grid = new_bottom_grid
-            
-    #         ## Transferring transformed attribute values to original object
-    #         self.transfer_faces(self.current_perspective, new_front_face)
-    #         self.transfer_faces(self.current_perspective.left, new_top_face)
-    #         self.transfer_faces(self.current_perspective.right, new_bottom_face)
-    #         self.transfer_faces(self.current_perspective.top, new_right_face)
-    #         self.transfer_faces(self.current_perspective.bottom, new_left_face)
-    #         self.transfer_faces(self.current_perspective.opposite, new_back_face)
-                
-    # def rotate_right(self, axis):
-    #     """
-    #     * This method performs the operation of rotating the cube rightwards. It makes calls to get the 
-    #     * transformed faces of the cube. These values are then transferred into the existing Face object.
-        
-    #     @params: axis (ENUM) - The enum is defined in Constraints.Axes . Tells the program along which axis to rotate.
-    #     @modifies: Face().__getattrs__.* - All attribute values for each of the faces in the Cube object.
-    #     @returns: None
-    #     """
-    #     current = self.current_perspective
-        
-    #     if axis == Axes.VERTICAL:
-    #         print('ROTATING RIGHT VERTICALLY')
-    #         ## Getting transformed Top & Bottom Faces
-    #         new_top_face = FaceTransformations.LeftAndRight.transform_top_bottom_faces(current, axis, is_top=True, is_left=False)
-    #         new_bottom_face = FaceTransformations.LeftAndRight.transform_top_bottom_faces(current, axis, is_top=False, is_left=False)
-            
-    #         ## Getting transformed Top & Bottom Grids
-    #         new_top_grid = GridTransformations.LeftAndRight.transform_top_face(current, axis, is_left=False)
-    #         new_bottom_grid = GridTransformations.LeftAndRight.transform_bottom_face(current, axis, is_left=False)
-            
-    #         ## Updating grid for each transformed face
-    #         new_top_face.grid = new_top_grid
-    #         new_bottom_face.grid = new_bottom_grid
-            
-    #         ## Changing perspective to left face
-    #         self.current_perspective = self.current_perspective.left
-            
-    #         ## Transferring transformed attribute values to original object
-    #         self.transfer_faces(self.current_perspective.top, new_top_face)
-    #         self.transfer_faces(self.current_perspective.bottom, new_bottom_face)
-    #     else:
-    #         print('ROTATING RIGHT HORIZONTALLY')
-    #         ## Getting transformed Left & Right Faces
-    #         new_right_face = FaceTransformations.LeftAndRight.transform_right_face(current, is_left=False)
-    #         new_left_face = FaceTransformations.LeftAndRight.transform_left_face(current, is_left=False)
-            
-    #         ## Getting transformed Left & Right Grids
-    #         new_right_grid = GridTransformations.LeftAndRight.transform_right_face(current, axis, is_left=False)
-    #         new_left_grid = GridTransformations.LeftAndRight.transform_left_face(current, axis, is_left=False)
-            
-    #         ## Getting transformed Front & Back Faces
-    #         new_front_face = FaceTransformations.LeftAndRight.transform_front_back_faces(current, is_front=True, is_left=False)
-    #         new_back_face = FaceTransformations.LeftAndRight.transform_front_back_faces(current, is_front=False, is_left=False)
-            
-    #         ## Getting transformed Front & Back Grids
-    #         new_front_grid = GridTransformations.LeftAndRight.transform_front_face(current, axis, is_left=False)
-    #         new_back_grid = GridTransformations.LeftAndRight.transform_back_face(current, axis, is_left=False)
-            
-    #         ## Getting transformed Top & Bottom Faces
-    #         new_top_face = FaceTransformations.LeftAndRight.transform_top_bottom_faces(current, axis, is_top=True, is_left=False)
-    #         new_bottom_face = FaceTransformations.LeftAndRight.transform_top_bottom_faces(current, axis, is_top=False, is_left=False)
-            
-    #         ## Getting transformed Top & Bottom Grids
-    #         new_top_grid = GridTransformations.LeftAndRight.transform_top_face(current, axis, is_left=False)
-    #         new_bottom_grid = GridTransformations.LeftAndRight.transform_bottom_face(current, axis, is_left=False)
-            
-    #         ## Updating grid for each transformed face
-    #         new_left_face.grid = new_left_grid
-    #         new_right_face.grid = new_right_grid
-    #         new_front_face.grid = new_front_grid
-    #         new_back_face.grid = new_back_grid
-    #         new_top_face.grid = new_top_grid
-    #         new_bottom_face.grid = new_bottom_grid
-            
-    #         ## Transferring transformed attribute values to original object
-    #         self.transfer_faces(self.current_perspective, new_front_face)
-    #         self.transfer_faces(self.current_perspective.left, new_bottom_face)
-    #         self.transfer_faces(self.current_perspective.right, new_top_face)
-    #         self.transfer_faces(self.current_perspective.top, new_left_face)
-    #         self.transfer_faces(self.current_perspective.bottom, new_right_face)
-    #         self.transfer_faces(self.current_perspective.opposite, new_back_face)
-        
-    # def rotate_up(self):
-    #     """
-    #     * This method performs the operation of rotating the cube upwards. It makes calls to get the 
-    #     * transformed faces of the cube. These values are then transferred into the existing Face object.
-        
-    #     @params: None
-    #     @modifies: Face().__getattrs__.* - All attribute values for each of the faces in the Cube object.
-    #     @returns: None
-    #     """
-    #     print('ROTATING UP')
-    #     current = self.current_perspective
-        
-    #     ## Getting transformed Left & Right Faces
-    #     new_left_face = FaceTransformations.UpAndDown.transform_left_face(current, is_rotate_down=False)
-    #     new_right_face = FaceTransformations.UpAndDown.transform_right_face(current, is_rotate_down=False)
-        
-    #     ## Getting transformed Left & Right Grids
-    #     new_left_grid = GridTransformations.UpAndDown.transform_left_face(current, is_rotate_down=False)
-    #     new_right_grid = GridTransformations.UpAndDown.transform_right_face(current, is_rotate_down=False)
-        
-    #     ## Getting transformed Front & Back Faces
-    #     new_front_face = FaceTransformations.UpAndDown.transform_front_back_faces(current, is_rotate_down=False)
-    #     new_back_face = FaceTransformations.UpAndDown.transform_front_back_faces(current, is_front=False, is_rotate_down=False)
-        
-    #     ## Getting transformed Back Grid
-    #     new_back_grid = GridTransformations.UpAndDown.transform_back_face(current, is_rotate_down=False)
-        
-    #     ## Getting transformed Top & Bottom Faces
-    #     new_top_face = FaceTransformations.UpAndDown.transform_top_bottom_faces(current, is_rotate_down=False)
-    #     new_bottom_face = FaceTransformations.UpAndDown.transform_top_bottom_faces(current, is_top=False, is_rotate_down=False)
-        
-    #     ## Getting transformed Top Grid
-    #     new_bottom_grid = GridTransformations.UpAndDown.transform_bottom_face(current, is_rotate_down=False)
-    #     new_top_grid = GridTransformations.UpAndDown.transform_top_face(current, is_rotate_down=False)
-        
-    #     ## Updating grid for each transformed face
-    #     new_left_face.grid = new_left_grid
-    #     new_right_face.grid = new_right_grid
-    #     new_top_face.grid = new_top_grid
-    #     new_bottom_face.grid = new_bottom_grid
-    #     new_back_face.grid = new_back_grid
-        
-    #     ## Changing perspective to top face
-    #     self.current_perspective = self.current_perspective.bottom
-        
-    #     ## Transferring transformed attribute values to original object
-    #     self.transfer_faces(self.current_perspective, new_bottom_face)
-    #     self.transfer_faces(self.current_perspective.right, new_right_face)
-    #     self.transfer_faces(self.current_perspective.left, new_left_face)
-    #     self.transfer_faces(self.current_perspective.top, new_front_face)
-    #     self.transfer_faces(self.current_perspective.bottom, new_back_face)
-    #     self.transfer_faces(self.current_perspective.opposite, new_top_face)
-        
-    # def rotate_down(self):
-    #     """
-    #     * This method performs the operation of rotating the cube downwards. It makes calls to get the 
-    #     * transformed faces of the cube. These values are then transferred into the existing Face object.
-        
-    #     @params: None
-    #     @modifies: Face().__getattrs__.* - All attribute values for each of the faces in the Cube object.
-    #     @returns: None
-    #     """
-    #     print('ROTATING DOWN')
-    #     current = self.current_perspective
-        
-    #     ## Getting transformed Left & Right Faces
-    #     new_left_face = FaceTransformations.UpAndDown.transform_left_face(current, is_rotate_down=True)
-    #     new_right_face = FaceTransformations.UpAndDown.transform_right_face(current, is_rotate_down=True)
-        
-    #     ## Getting transformed Left & Right Grids
-    #     new_left_grid = GridTransformations.UpAndDown.transform_left_face(current, is_rotate_down=True)
-    #     new_right_grid = GridTransformations.UpAndDown.transform_right_face(current, is_rotate_down=True)
-        
-    #     ## Getting transformed Front & Back Faces
-    #     new_front_face = FaceTransformations.UpAndDown.transform_front_back_faces(current, is_rotate_down=True)
-    #     new_back_face = FaceTransformations.UpAndDown.transform_front_back_faces(current, is_front=False, is_rotate_down=True)
-        
-    #     ## Getting transformed Back Grid
-    #     new_back_grid = GridTransformations.UpAndDown.transform_back_face(current, is_rotate_down=True)
-        
-    #     ## Getting transformed Top & Bottom Faces
-    #     new_top_face = FaceTransformations.UpAndDown.transform_top_bottom_faces(current, is_rotate_down=True)
-    #     new_bottom_face = FaceTransformations.UpAndDown.transform_top_bottom_faces(current, is_top=False, is_rotate_down=True)
-        
-    #     ## Getting transformed Top Grid
-    #     new_top_grid = GridTransformations.UpAndDown.transform_top_face(current, is_rotate_down=True)
-    #     new_bottom_grid = GridTransformations.UpAndDown.transform_bottom_face(current, is_rotate_down=True)
-        
-    #     ## Updating grid for each transformed face
-    #     new_left_face.grid = new_left_grid
-    #     new_right_face.grid = new_right_grid
-    #     new_top_face.grid = new_top_grid
-    #     new_bottom_face.grid = new_bottom_grid
-    #     new_back_face.grid = new_back_grid
-        
-    #     ## Changing perspective to top face
-    #     self.current_perspective = self.current_perspective.top
-        
-    #     ## Transferring transformed attribute values to original object
-    #     self.transfer_faces(self.current_perspective, new_top_face)
-    #     self.transfer_faces(self.current_perspective.right, new_right_face)
-    #     self.transfer_faces(self.current_perspective.left, new_left_face)
-    #     self.transfer_faces(self.current_perspective.top, new_back_face)
-    #     self.transfer_faces(self.current_perspective.bottom, new_front_face)
-    #     self.transfer_faces(self.current_perspective.opposite, new_bottom_face)
-          
-    # def invert_cube(self, axis=Axes.VERTICAL):
-    #     """
-    #     * This method performs the operation of inverting the cube. It makes calls to get the 
-    #     * transformed faces of the cube. These values are then transferred into the existing Face object.
-        
-    #     @params: axis (ENUM) - The enum is defined in Constraints.Axes . Tells the program along which axis to invert.
-    #     @modifies: Face().__getattrs__.* - All attribute values for each of the faces in the Cube object.
-    #     @returns: None
-    #     """
-    #     current = self.current_perspective
-        
-    #     if axis == Axes.VERTICAL:
-    #         print('INVERTING CUBE VERTICALLY')
-            
-    #         ## Getting transformed Top & Bottom Faces
-    #         new_top_face = FaceTransformations.Inversion.transform_top_bottom_faces(current, axis, is_top=True)
-    #         new_bottom_face = FaceTransformations.Inversion.transform_top_bottom_faces(current, axis, is_top=False)
-            
-    #         ## Getting transformed Top & Bottom Grids
-    #         new_top_grid = GridTransformations.Inversion.transform_top_face(current, axis)
-    #         new_bottom_grid = GridTransformations.Inversion.transform_bottom_face(current, axis)
-            
-    #         ## Updating grid for each transformed face
-    #         new_top_face.grid = new_top_grid
-    #         new_bottom_face.grid = new_bottom_grid
-            
-    #         ## Changing perspective to opposite face
-    #         self.current_perspective = self.current_perspective.opposite
-            
-    #         ## Transferring transformed attribute values to original object
-    #         self.transfer_faces(self.current_perspective.top, new_top_face)
-    #         self.transfer_faces(self.current_perspective.bottom, new_bottom_face)
-            
-    #     else:
-    #         print('INVERTING CUBE HORIZONTALLY')
-            
-    #         ## Getting transformed Top & Bottom Faces
-    #         new_top_face = FaceTransformations.Inversion.transform_top_bottom_faces(current, axis, is_top=True)
-    #         new_bottom_face = FaceTransformations.Inversion.transform_top_bottom_faces(current, axis, is_top=False)
-            
-    #         ## Getting transformed Top & Bottom Grids
-    #         new_top_grid = GridTransformations.Inversion.transform_top_face(current, axis)
-    #         new_bottom_grid = GridTransformations.Inversion.transform_bottom_face(current, axis)
-            
-    #         ## Getting transformed Front & Back Faces
-    #         new_front_face = FaceTransformations.Inversion.transform_front_back_faces(current, is_front=True)
-    #         new_back_face = FaceTransformations.Inversion.transform_front_back_faces(current, is_front=False)
-            
-    #         ## Getting transformed Front & Back Grids
-    #         new_front_grid = GridTransformations.Inversion.transform_front_face(current, axis)
-    #         new_back_grid = GridTransformations.Inversion.transform_back_face(current, axis)
-            
-    #         ## Getting transformed Left & Right Faces
-    #         new_left_face = FaceTransformations.Inversion.transform_right_left_faces(current, is_left_face=True)
-    #         new_right_face = FaceTransformations.Inversion.transform_right_left_faces(current, is_left_face=False)
-            
-    #         ## Getting transformed Left & Right Grids
-    #         new_left_grid = GridTransformations.Inversion.transform_left_face(current, axis)
-    #         new_right_grid = GridTransformations.Inversion.transform_right_face(current, axis)
-            
-    #         ## Updating grid for each transformed face
-    #         new_left_face.grid = new_left_grid
-    #         new_right_face.grid = new_right_grid
-    #         new_top_face.grid = new_top_grid
-    #         new_bottom_face.grid = new_bottom_grid
-    #         new_back_face.grid = new_back_grid
-    #         new_front_face.grid = new_front_grid
-            
-    #         ## Changing perspective to opposite face
-    #         self.current_perspective = self.current_perspective.opposite
-            
-    #         ## Transferring transformed attribute values to original object
-    #         self.transfer_faces(self.current_perspective, new_back_face)
-    #         self.transfer_faces(self.current_perspective.right, new_right_face)
-    #         self.transfer_faces(self.current_perspective.left, new_left_face)
-    #         self.transfer_faces(self.current_perspective.top, new_bottom_face)
-    #         self.transfer_faces(self.current_perspective.bottom, new_top_face)
-    #         self.transfer_faces(self.current_perspective.opposite, new_front_face)
-        
-    # def transfer_faces(self, old, new):
-    #     """
-    #     *This method transplants values from the copied face object to the original face object of the cube.
-        
-    #     @params: old (Face): Original face object from the Cube class
-    #     @      : new (Face): Copied face object with updated attributes (after transformation)
-        
-    #     @modified: Face.*: All attributes from the Face class
-    #     @returns: None
-    #     """
-    #     old.left = new.left
-    #     old.right = new.right
-    #     old.top = new.top
-    #     old.bottom = new.bottom
-    #     old.front = new.front
-    #     old.back = new.back
-    #     old.is_side_face = new.is_side_face
-    #     old.grid = new.grid
-    
-    def print_cube_grid(self):
-        front = self.current_perspective.copy()
-        
-        left_grid = self.get_2D_cube_grid(front.left, Orientation.LEFT)
-        right_grid = self.get_2D_cube_grid(front.right, Orientation.RIGHT)
-        top_grid = self.get_2D_cube_grid(front.top, Orientation.TOP)
-        bottom_grid = self.get_2D_cube_grid(front.bottom, Orientation.BOTTOM)
-        back_grid = self.get_2D_cube_grid(front.opposite, Orientation.BACK)
-        front_grid = self.get_2D_cube_grid(front, Orientation.FRONT)
-        
-        print(f'      ______')
-        print(f'     !{left_grid[0]}|\n     !{left_grid[1]}|\n     !{left_grid[2]}|')
-        print('________________________')
-        print(f'{front_grid[0]}|{bottom_grid[0]}|{back_grid[0]}|{top_grid[0]}|')
-        print(f'{front_grid[1]}|{bottom_grid[1]}|{back_grid[1]}|{top_grid[1]}|')
-        print(f'{front_grid[2]}|{bottom_grid[2]}|{back_grid[2]}|{top_grid[2]}|')
-        print('________________________')
-        print(f'     !{right_grid[0]}|\n     !{right_grid[1]}|\n     !{right_grid[2]}|')
-        print(f'      ______')
         
     def get_2D_cube_grid(self, face, orientation):
+        """
+        This method builds the transformed grids to be used in the string representation of the cube. 
+
+        Args:
+            face (Face): face instance that the grid is being transformed for
+            orientation (str): String literal showing if the face is left, right, top, bottom, back or front of Cube().current_perspective
+
+        Returns:
+            tuple: The tuple contains the string output for each row/column in the grid
+        """
         if orientation == Orientation.LEFT:
             first_row = f'{face.grid[FacePositions.TOP_RIGHT].colour[0]} {face.grid[FacePositions.TOP_CENTER].colour[0]} {face.grid[FacePositions.TOP_LEFT].colour[0]}'
             second_row = f'{face.grid[FacePositions.MID_RIGHT].colour[0]} {face.grid[FacePositions.MID_CENTER].colour[0]} {face.grid[FacePositions.MID_LEFT].colour[0]}'
@@ -653,55 +465,6 @@ class Cube():
         print('Front Colours')
         print(f'Front: {front.center_colour}, Left: {front.left.center_colour}, Right: {front.right.center_colour}, \
                 Top: {front.top.center_colour}, Bottom: {front.bottom.center_colour}, Back: {front.opposite.center_colour}\n')
-    
-    def reset_perspective(self):
-        print('RESETTING PERSPECTIVE')
-        iters = 0
-        while True:
-            blue_face_orientation = self.get_orientation()
-            if Predicates.FacePredicates.is_correct_perspective(self):
-                break
-            else:
-                orientation = self.get_orientation()
-                print(orientation)
-                if orientation == Orientation.TOP:
-                    self.move(PossibleOperations.ROTATE_DOWN)
-                    # self.rotate_down()
-                elif orientation == Orientation.BOTTOM:
-                    self.move(PossibleOperations.ROTATE_UP)
-                    # self.rotate_up()
-                elif orientation == Orientation.BACK:
-                    if Predicates.FacePredicates.is_white_face_top(self.current_perspective, self.white_face):
-                        self.move(PossibleOperations.INVERT_CUBE_VERTICALLY)
-                        # self.invert_cube(Axes.VERTICAL)
-                    else:
-                        self.move(PossibleOperations.INVERT_CUBE_HORIZONTALLY)
-                        # self.invert_cube(Axes.HORIZONTAL)
-                elif orientation == Orientation.LEFT:
-                    self.move(PossibleOperations.ROTATE_RIGHT_VERTICALLY)
-                    # self.rotate_right(Axes.VERTICAL)
-                elif orientation == Orientation.RIGHT:
-                    self.move(PossibleOperations.ROTATE_LEFT_VERTICALLY)
-                    # self.rotate_left(Axes.VERTICAL)
-                else:
-                    if iters > 5:
-                        raise Exception('Invalid Cube! Exiting Infinite Loop')
-                    else:
-                        self.move(PossibleOperations.ROTATE_LEFT_HORIZONTALLY)
-                        # self.rotate_left(Axes.HORIZONTAL)
-                iters += 1
-    
-    def get_orientation(self):
-        if Predicates.FacePredicates.are_faces_equal(self.current_perspective.top, self.blue_face):
-            return Orientation.TOP
-        elif Predicates.FacePredicates.are_faces_equal(self.current_perspective.right, self.blue_face):
-            return Orientation.RIGHT
-        elif Predicates.FacePredicates.are_faces_equal(self.current_perspective.left, self.blue_face):
-            return Orientation.LEFT
-        elif Predicates.FacePredicates.are_faces_equal(self.current_perspective.bottom, self.blue_face):
-            return Orientation.BOTTOM
-        elif Predicates.FacePredicates.are_faces_equal(self.current_perspective.opposite, self.blue_face):
-            return Orientation.BACK
         
 
 class Face:
@@ -830,99 +593,9 @@ class CornerPiece(Piece):
     
 if __name__ == "__main__":
     cube1 = Cube()
-    # print(Predicates.FacePredicates.is_correct_perspective(cube))
-    # cube.print_cube_grid()
-    # cube.get_attributes()
-    # cube.rotate_down()
-    # cube.rotate_left(Axes.HORIZONTAL)
-    # Shifts.top_row_left(cube.current_perspective)
-    
-    # Shifts.top_row_left(cube.current_perspective)
-    # Shifts.bottom_row_left(cube.current_perspective)
-    # Shifts.bottom_row_left(cube.current_perspective)
-    # print(cube.current_perspective.grid[FacePositions.TOP_LEFT])
-    # print(cube.current_perspective.grid[FacePositions.TOP_LEFT].complements)
-    
-    # print(cube.current_perspective.left.grid[FacePositions.TOP_RIGHT])
-    # print(cube.current_perspective.left.grid[FacePositions.TOP_RIGHT].complements)
-    # # cube.rotate_left(Axes.HORIZONTAL)
-    
-    # cube.move(Shifts.RIGHT_COL_UP)
-    # cube1.move(PossibleOperations.ROTATE_LEFT_VERTICALLY)
-    # cube1.print_cube_grid()
-    # cube1.move(PossibleOperations.ROTATE_RIGHT_VERTICALLY)
-    # decorated_move = cube1.get_kwargs(cube1.move)
-    # decorated_move(cube1, PossibleOperations.ROTATE_LEFT_VERTICALLY)
-    
-    # print(cube.current_perspective.top.grid[FacePositions.BOTTOM_LEFT])
-    # print(cube.current_perspective.top.grid[FacePositions.BOTTOM_LEFT].complements)
-    # Shifts.top_row_left(cube.current_perspective)
-    # Shifts.top_row_left(cube.current_perspective)
-    # Shifts.bottom_row_left(cube.current_perspective)
-    # Shifts.bottom_row_left(cube.current_perspective)
-    # cube2 = Cube()
-    # cube2.rotate_left(Axes.VERTICAL)
-    
-    # cube.rotate_down()
-    
-    # Shifts.top_row_left(cube.current_perspective)
-    # Shifts.top_row_left(cube.current_perspective)
-    # Shifts.bottom_row_left(cube.current_perspective)
-    # Shifts.bottom_row_left(cube.current_perspective)
-    
-    # Shifts.right_column_up(cube.current_perspective)
-    # Shifts.left_column_up(cube.current_perspective)
-    # cube1.move(PossibleOperations.RIGHT_COL_UP)
     cube1.move(PossibleOperations.ROTATE_DOWN)
     cube1.move(PossibleOperations.ROTATE_LEFT_HORIZONTALLY)
-    
     print(cube1)
     cube1.move(PossibleOperations.RESET_PERSPECTIVE)
-    # cube.rotate_right(Axes.HORIZONTAL)
-    # cube.rotate_left(Axes.VERTICAL)
-    # cube.rotate_right(Axes.VERTICAL)
-    # cube.rotate_right(Axes.HORIZONTAL)
-    # cube.rotate_right(Axes.HORIZONTAL)
-    # cube.rotate_right(Axes.HORIZONTAL)
-    # cube.rotate_right(Axes.HORIZONTAL)
-    # cube.rotate_right(Axes.HORIZONTAL)
-    # cube.rotate_right(Axes.HORIZONTAL)
-    # cube.rotate_right(Axes.HORIZONTAL)
-    # cube.rotate_right(Axes.HORIZONTAL)
-    # Shifts.right_column_up(cube.current_perspective)
-    # cube1.print_cube_grid()
     print(cube1)
-    # cube2.print_cube_grid()
-    # Shifts.right_column_down(cube.current_perspective)
-    # print('Blue')
-    # print(cube.current_perspective.grid)
-    # print('Red')
-    # print(cube.current_perspective.left.grid)
-    # print('Orange')
-    # print(cube.current_perspective.right.grid)
-    # print('Green')
-    # print(cube.current_perspective.opposite.grid)
-    # print('White')
-    # print(cube.current_perspective.top.grid)
-    # print('Yellow')
-    # print(cube.current_perspective.bottom.grid)
-    # cube.rotate_up()
-    # cube.rotate_up()
-    # cube.rotate_up()
-    # cube.rotate_up()
-    # cube.rotate_up()
-    # cube.rotate_up()
-    # cube.rotate_up()
-    # cube.rotate_up()
-    # print(Predicates.FacePredicates.is_correct_perspective(cube))
-    # print(Predicates.FacePredicates.is_blue_face_front(cube.current_perspective, cube.blue_face))
-    # print(Predicates.FacePredicates.is_white_face_top(cube.current_perspective, cube.white_face))
-    # print(Predicates.FacePredicates.is_orange_face_right(cube.current_perspective, cube.orange_face))
-    # print(Predicates.FacePredicates.is_red_face_left(cube.current_perspective, cube.red_face))
-    # print(Predicates.FacePredicates.is_green_face_back(cube.current_perspective, cube.green_face))
-    # print(Predicates.FacePredicates.is_yellow_face_bottom(cube.current_perspective, cube.yellow_face))
-    # cube.print_cube_grid()
-    # cube.get_attributes()
-    # cube.reset_perspective()
-    # cube.print_cube_grid()
     

@@ -4,7 +4,7 @@ from Constraints import FacePositions, Axes
 from Transformations import FaceTransformations, GridTransformations
 import Predicates
 
-class TestValidity(unittest.TestCase):
+class TestRubixCube(unittest.TestCase):
     
     def test_cube_init(self):
         cube = Cube()

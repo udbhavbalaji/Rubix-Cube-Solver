@@ -1,7 +1,10 @@
-class PieceType:
+from enum import Enum
+
+class PieceType(Enum):
     EDGE = 'Edge'
     CENTER = 'Center'
     CORNER = 'Corner'
+    
     
 class Colours:
     WHITE = 'White'
@@ -11,10 +14,12 @@ class Colours:
     BLUE = 'Blue'
     YELLOW = 'Yellow'
     
+    
 class ImpossibleNeighbours:
     WHITE_YELLOW = (Colours.WHITE, Colours.YELLOW)
     ORANGE_RED = (Colours.ORANGE, Colours.RED)
     BLUE_GREEN = (Colours.BLUE, Colours.GREEN)
+    
     
 class PossibleEdgePieces:
     WHITE_GREEN = (Colours.WHITE, Colours.GREEN)
@@ -32,6 +37,7 @@ class PossibleEdgePieces:
     ORANGE_BLUE = (Colours.ORANGE, Colours.BLUE)
     BLUE_RED = (Colours.BLUE, Colours.RED)
     
+    
 class PossibleCornerPieces:
     WHITE_RED_BLUE = (Colours.WHITE, Colours.RED, Colours.BLUE)
     WHITE_ORANGE_BLUE = (Colours.WHITE, Colours.ORANGE, Colours.BLUE)
@@ -43,9 +49,11 @@ class PossibleCornerPieces:
     YELLOW_GREEN_RED = (Colours.YELLOW, Colours.GREEN, Colours.RED)
     YELLOW_GREEN_ORANGE = (Colours.YELLOW, Colours.ORANGE, Colours.GREEN)
     
-class Axes:
+    
+class Axes(Enum):
     VERTICAL = 'Vertical'
     HORIZONTAL = 'Horizontal'
+    
     
 class FacePositions:
     TOP_LEFT = (0,0)
@@ -66,11 +74,10 @@ class FacePositions:
     CENTER_COL = 1
     RIGHT_COL = 2
     
-    def get_colour(face, face_position):
-        return face.grid[face_position]
+    POSITIONS = [TOP_LEFT, TOP_CENTER, TOP_RIGHT, MID_LEFT, MID_CENTER, MID_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT]
     
     
-class Orientation:
+class Orientation(Enum):
     FRONT = 'Front'
     BACK = 'Back'
     LEFT = 'Left'
@@ -79,15 +86,33 @@ class Orientation:
     BOTTOM = 'Bottom'
 
 
-
-class Perspectives:
-    # def __init__(self):
-    #     self.current_perspective = Colours.BLUE
-        
-    #     pass
+class PossibleOperations:
     
-    def change_perspective():
-        pass
+    ROTATE_LEFT_VERTICALLY = 'Rotating Left Vertically'
+    ROTATE_RIGHT_VERTICALLY = 'Rotating Right Vertically'
+    ROTATE_UP = 'Rotating Up'
+    ROTATE_DOWN = 'Rotating Down'
+    ROTATE_LEFT_HORIZONTALLY = 'Rotating Left Horizontally'
+    ROTATE_RIGHT_HORIZONTALLY = 'Rotating Right Horizontally'
+    INVERT_CUBE_VERTICALLY = 'Inverting Cube Vertically'
+    INVERT_CUBE_HORIZONTALLY = 'Inverting Cube Horizontally'
     
+    RIGHT_COL_UP = 'Rotating Right Column Up'
+    LEFT_COL_UP = 'Rotating Left Column Up'
+    RIGHT_COL_DOWN = 'Rotating Right Column Down'
+    LEFT_COL_DOWN = 'Rotating Left Column Down'
+    TOP_ROW_LEFT = 'Rotating Top Row Left'
+    TOP_ROW_RIGHT = 'Rotating Top Row Right'
+    BOTTOM_ROW_LEFT = 'Rotating Bottom Row Left'
+    BOTTOM_ROW_RIGHT = 'Rotating Bottom Row Right'
     
-    pass
+    RESET_PERSPECTIVE = 'Resetting Cube Perspective'
+    
+    SHUFFLE_CUBE = 'Shuffling Cube'
+    
+    MOVES = [ROTATE_LEFT_VERTICALLY, ROTATE_RIGHT_VERTICALLY, ROTATE_UP, ROTATE_DOWN,
+             ROTATE_LEFT_HORIZONTALLY, ROTATE_RIGHT_HORIZONTALLY, INVERT_CUBE_VERTICALLY, INVERT_CUBE_HORIZONTALLY,
+             RIGHT_COL_UP, LEFT_COL_UP, RIGHT_COL_DOWN, LEFT_COL_DOWN,
+             TOP_ROW_LEFT, TOP_ROW_RIGHT, BOTTOM_ROW_LEFT, BOTTOM_ROW_RIGHT,
+             RESET_PERSPECTIVE, SHUFFLE_CUBE]
+    

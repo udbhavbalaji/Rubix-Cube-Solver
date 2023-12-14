@@ -18,6 +18,16 @@ def get_count_complements(piece):
                 raise ValueError(f'Number of complements = {len(piece.complements)} ≠ 2')
         except(TypeError):
             raise TypeError(f'Received Type: {piece}\nExpected Type: tuple')
+    elif piece.piece_type == PieceType.EDGE:
+        
+        pass
     else:
         pass
     pass
+
+
+face = Face('Blue')
+piece = CornerPiece(FacePositions.TOP_LEFT, face, PieceType.CORNER)
+print(type(piece.colour))
+print(type(piece.face))
+print(type(piece.piece_type))

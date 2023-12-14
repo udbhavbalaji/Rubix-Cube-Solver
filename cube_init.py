@@ -2,6 +2,7 @@
 This module contains the RubixCube, Face, Piece, EdgePiece and CornerPiece classes. It creates a Rubix Cube, 
 allowing all possible operations that can be done to a Rubix Cube in real life.
 """
+from __future__ import annotations
 # Importing installed modules
 import numpy as np
 # Importing built-in modules
@@ -60,9 +61,9 @@ class RubixCube():
     COLOURS = [Colours.BLUE, Colours.ORANGE, Colours.GREEN, Colours.RED, Colours.WHITE, Colours.YELLOW]
     
     def __init__(self, 
-                 current=None, initial=None, blue=None, white=None, 
-                 yellow=None, red=None, orange=None, green=None, 
-                 is_copy=False):
+                 current: Face = None, initial: Face = None, blue: Face = None, white: Face = None, 
+                 yellow: Face = None, red: Face = None, orange: Face = None, green: Face = None, 
+                 is_copy: bool = False) -> None:
         """
         Constructor method for the Cube class.
 
@@ -94,7 +95,7 @@ class RubixCube():
             
         self.kwargs_dict = self.init_kwargs()
                         
-    def __str__(self):
+    def __str__(self) -> str:
         """
         This method is called to return the string representation of the cube. It is represented as a 2D grid, 
         as shown below.
@@ -146,7 +147,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         
         return output
             
-    def init_kwargs(self):
+    def init_kwargs(self) -> dict:
         """
         This method initializes the operation functions and corresponding kwargs for each of the 
         possible operations.
@@ -179,7 +180,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         return kwargs_dict
             
     @property
-    def kwargs_dict(self):
+    def kwargs_dict(self) -> dict:
         """
         This is a getter method for the property Cube().kwargs_dict. It returns the dict that is stored in
         Cube()._kwargs_dict. 
@@ -190,7 +191,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         return self._kwargs_dict
     
     @kwargs_dict.setter
-    def kwargs_dict(self, new_dict):
+    def kwargs_dict(self, new_dict: dict) -> None:
         """
         This is a setter method to internally re-assign the property (if required). It overrides the current dict
         withnew_dict.
@@ -200,7 +201,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         """
         self._kwargs_dict = new_dict
     
-    def copy(self):
+    def copy(self) -> RubixCube:
         """
         This method creates and returns a copy of the current object (Cube) with all attribute values duplicated.
 
@@ -210,7 +211,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         return RubixCube(self.current_perspective, self.initial_perspective, self.blue_face, self.white_face, self.yellow_face, \
                     self.red_face, self.orange_face, self.green_face, is_copy=True)
     
-    def initialize_random_cube(self):
+    def initialize_random_cube(self) -> None:
         """
         This method initializes the Rubix Cube. The faces are created, edges are joined and positional attributes 
         assigned. All complements values are assigned for each piece (type=PieceType) in each face (type=FaceType).
@@ -343,9 +344,8 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         
         # Back to Blue Face
         self.move(PossibleOperations.RESET_PERSPECTIVE, verbose=False)
-        # self.reset_perspective()
         
-    def assign_complements(self, face):
+    def assign_complements(self, face: "Face") -> None:
         """
         This method assigns the complements for each piece in the face. EdgePiece and CornerPiece classes
         have instance attributes (EdgePiece().complement and CornerPiece().complements respectively) that hold 
@@ -370,7 +370,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         face.grid[FacePositions.BOTTOM_LEFT].complements = (face.bottom.grid[FacePositions.TOP_LEFT], face.left.grid[FacePositions.BOTTOM_RIGHT])
         face.grid[FacePositions.BOTTOM_RIGHT].complements = (face.bottom.grid[FacePositions.TOP_RIGHT], face.right.grid[FacePositions.BOTTOM_LEFT])
         
-    def get_kwargs(original_func):
+    def get_kwargs(original_func: function) -> function:
         """
         This is a decorator method that selects operation function and kwargs based on the requested operation.
 
@@ -381,7 +381,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
             perform_operation (func): Wrapper function that performs the operation
         """
         
-        def perform_operation(self, operation, verbose=True):
+        def perform_operation(self, operation: str, verbose: bool = True) -> list:
             """
             This is the wrapper function for the get_kwargs decorator method. It obtains the correct operation function
             and executes it before calling the Cube().move method.
@@ -395,11 +395,12 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
             original_func(self, operation, verbose)
             if op_stack is not None:
                 return op_stack
+            return []
         
         return perform_operation
         
     @get_kwargs
-    def move(self, operation, verbose=True):
+    def move(self, operation: str, verbose: bool = True) -> None:
         """
         This function performs the operation requested/specified.
 
@@ -410,7 +411,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         if verbose:
             print(operation)
         
-    def get_2D_cube_grid(self, face, orientation):
+    def get_2D_cube_grid(self, face: Face, orientation: str) -> tuple:
         """
         This method builds the transformed grids to be used in the string representation of the cube. 
 
@@ -443,7 +444,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         
         return (first_row, second_row, third_row)
     
-    def print_cube_structure_2D(self):
+    def print_cube_structure_2D(self) -> None:
         front = self.current_perspective.copy()
         # Printing Format
         #       Left
@@ -456,7 +457,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         print(f'{front.center_colour}    {front.bottom.center_colour}    {front.opposite.center_colour}    {front.top.center_colour}')
         print(f'          {front.right.center_colour}\n')
         
-    def get_attributes(self):
+    def get_attributes(self) -> None:
         front = self.current_perspective
         right_face = front.right
         left_face = front.left
@@ -497,9 +498,9 @@ class Face:
     """
     
     def __init__(self, 
-                 colour=None, right=None, left=None, top=None, bottom=None, 
-                 front=None, back=None, opposite=None, is_side_face=True, 
-                 is_copy=False, grid=None):
+                 colour: str = None, right: Face = None, left: Face = None, top: Face = None, bottom: Face = None, 
+                 front: Face = None, back: Face = None, opposite: Face = None, is_side_face: bool = True, 
+                 is_copy: bool = False, grid: np.ndarray = None) -> None:
         """
         Constructor method for the Face class.
 
@@ -535,7 +536,7 @@ class Face:
         else:
             self.grid = self.initialize_pieces()
         
-    def copy(self):
+    def copy(self) -> Face:
         """
         This method creates and returns a duplicate Face instance with all attributes values copied.
 
@@ -544,7 +545,7 @@ class Face:
         """
         return Face(self.center_colour, self.right, self.left, self.top, self.bottom, self.front, self.back, self.opposite, self.is_side_face, is_copy=True, grid=self.grid.copy())
         
-    def initialize_pieces(self):
+    def initialize_pieces(self) -> np.ndarray:
         """
         This method initializes the grid for the current face instance. It is represented by a 3 X 3 matrix.
 
@@ -553,7 +554,7 @@ class Face:
         """
         ## Creating center piece
         center_piece = Piece(FacePositions.MID_CENTER, self, PieceType.CENTER)
-        colour = center_piece.colour[0]
+        # colour = center_piece.colour[0]
         
         ## Creating edge pieces
         top_center_piece = EdgePiece(FacePositions.TOP_CENTER, self, PieceType.EDGE)
@@ -609,7 +610,7 @@ class Piece:
         _piece_type (str): a string property that stores the piece's type (Center, Edge, Corner)
     """
     
-    def __init__(self, face_position, face, piece_type):
+    def __init__(self, face_position: tuple, face: Face, piece_type: str) -> None:
         """
         Constructor method for the Piece Class.
 
@@ -624,7 +625,7 @@ class Piece:
         self._piece_type = piece_type
         
     @property
-    def colour(self):
+    def colour(self) -> str:
         """
         This is a getter method for the Piece()._colour property. It returns the string literal stored in
         Piece()._colour.
@@ -635,7 +636,7 @@ class Piece:
         return self._colour
     
     @property
-    def piece_type(self):
+    def piece_type(self) -> str:
         """
         This is a getter method for the Piece()._piece_type property. It returns the string literal stored
         in Piece()._piece_type. 
@@ -660,7 +661,7 @@ class EdgePiece(Piece):
         _complement (EdgePiece): a pointer property to the Piece instance that is the current Piece instance's complement
     """
     
-    def __init__(self, face_position, face, piece_type, complement=None):
+    def __init__(self, face_position: tuple, face: Face, piece_type: str, complement: Face = None) -> None:
         """
         Constructor method for the EdgePiece class.
 
@@ -674,7 +675,7 @@ class EdgePiece(Piece):
         self._complement = complement
         
     @property
-    def complement(self):
+    def complement(self) -> Face:
         """
         This is a getter method for the EdgePiece()._complement property. It returns the Piece object instance stored in
         CornerPiece()._complement.
@@ -686,7 +687,7 @@ class EdgePiece(Piece):
         return self._complement
     
     @complement.setter
-    def complement(self, new_complement):
+    def complement(self, new_complement: Face) -> None:
         """
         This is a setter method for the EdgePiece()._complement property. It overrides the current value in
         EdgePiece()._complement with the value in new_complement.
@@ -713,7 +714,7 @@ class CornerPiece(Piece):
                               current Piece instance's complements
     """
     
-    def __init__(self, face_position, face, piece_type, complements=()):
+    def __init__(self, face_position: tuple, face: Face, piece_type: str, complements: tuple = ()) -> None:
         """
         Constructor method for the CornerPiece class.
 
@@ -728,7 +729,7 @@ class CornerPiece(Piece):
         self._complements = complements
         
     @property
-    def complements(self):
+    def complements(self) -> tuple:
         """
         This is a getter method for the CornerPiece()._complements property. It returns the tuple stored in
         CornerPiece()._complements.
@@ -740,7 +741,7 @@ class CornerPiece(Piece):
         return self._complements
     
     @complements.setter
-    def complements(self, new_complements):
+    def complements(self, new_complements: tuple) -> None:
         """
         This is a setter method for the CornerPiece()._complements property. It overrides the current value in
         CorenerPiece()._complements with the value in new_complements.
@@ -754,7 +755,8 @@ class CornerPiece(Piece):
     
 if __name__ == "__main__":
     cube = RubixCube()
-    op_stack = cube.move(PossibleOperations.SHUFFLE_CUBE)
+    op_stack, error_stack = cube.move(PossibleOperations.SHUFFLE_CUBE)
     print(cube)
     print(op_stack)
+    print(error_stack)
     

@@ -1,4 +1,6 @@
-class PieceType:
+from enum import Enum
+
+class PieceType(Enum):
     EDGE = 'Edge'
     CENTER = 'Center'
     CORNER = 'Corner'
@@ -48,7 +50,7 @@ class PossibleCornerPieces:
     YELLOW_GREEN_ORANGE = (Colours.YELLOW, Colours.ORANGE, Colours.GREEN)
     
     
-class Axes:
+class Axes(Enum):
     VERTICAL = 'Vertical'
     HORIZONTAL = 'Horizontal'
     
@@ -74,11 +76,8 @@ class FacePositions:
     
     POSITIONS = [TOP_LEFT, TOP_CENTER, TOP_RIGHT, MID_LEFT, MID_CENTER, MID_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT]
     
-    def get_colour(face, face_position):
-        return face.grid[face_position]
     
-    
-class Orientation:
+class Orientation(Enum):
     FRONT = 'Front'
     BACK = 'Back'
     LEFT = 'Left'

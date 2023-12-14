@@ -1,9 +1,14 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import numpy as np
 from Constraints import Axes, FacePositions, Orientation
 
+if TYPE_CHECKING:
+    from cube_init import RubixCube, Face, Piece, CornerPiece, EdgePiece
+
 class GridTransformations: 
     
-    def update_piece_positions(face, is_test=False):
+    def update_piece_positions(face: Face, is_test: bool = False) -> None:
         if not is_test:
             top_left_piece = face.grid[FacePositions.TOP_LEFT]
             top_center_piece = face.grid[FacePositions.TOP_CENTER]
@@ -39,13 +44,17 @@ class GridTransformations:
     class ColumnUpAndDown:
         
         #* GRID TRANSFORMATIONS FOR COLUMN UP AND DOWN
-        def transform_left_face(current_front, is_rotate_down=True, is_test=False):
+        
+        # UnitTest Added
+        def transform_left_face(current_front: Face, is_rotate_down: bool = True, is_test: bool = False) -> np.ndarray:
             return GridTransformations.UpAndDown.transform_left_face(current_front, is_rotate_down=is_rotate_down, is_test=is_test)
         
-        def transform_right_face(current_front, is_rotate_down=True, is_test=False):
+        # UnitTest Added
+        def transform_right_face(current_front: Face, is_rotate_down: bool = True, is_test: bool = False) -> np.ndarray:
             return GridTransformations.UpAndDown.transform_right_face(current_front, is_rotate_down=is_rotate_down, is_test=is_test)
         
-        def transform_front_face(current_front, is_rotate_down=True, is_right_col=True, is_test=False):
+        # UnitTest Added
+        def transform_front_face(current_front: Face, is_rotate_down: bool = True, is_right_col: bool = True, is_test: bool = False) -> np.ndarray:
             front_face = current_front.copy()
             old_face = front_face.copy()
             
@@ -73,7 +82,7 @@ class GridTransformations:
                 
             return front_face.grid
         
-        def transform_top_face(current_front, is_rotate_down=True, is_right_col=True, is_test=False):
+        def transform_top_face(current_front: Face, is_rotate_down: bool = True, is_right_col: bool = True, is_test: bool = False) -> np.ndarray:
             top_face = current_front.top.copy()
             old_face = top_face.copy()
             
@@ -100,7 +109,7 @@ class GridTransformations:
 
             return top_face.grid
         
-        def transform_bottom_face(current_front, is_rotate_down=True, is_right_col=True, is_test=False):
+        def transform_bottom_face(current_front: Face, is_rotate_down: bool = True, is_right_col: bool = True, is_test: bool = False) -> np.ndarray:
             bottom_face = current_front.bottom.copy()
             old_face = bottom_face.copy()
             
@@ -127,7 +136,7 @@ class GridTransformations:
             
             return bottom_face.grid
         
-        def transform_back_face(current_front, is_rotate_down=True, is_right_col=True, is_test=False):
+        def transform_back_face(current_front: Face, is_rotate_down: bool = True, is_right_col: bool = True, is_test: bool = False) -> np.ndarray:
             back_face = current_front.opposite.copy()
             old_face = back_face.copy()
             
@@ -157,13 +166,13 @@ class GridTransformations:
     
     class RowRightAndLeft:
         
-        def transform_top_face(current_front, is_rotate_left=True, is_test=False):
+        def transform_top_face(current_front: Face, is_rotate_left: bool = True, is_test: bool = False) -> np.ndarray:
             return GridTransformations.LeftAndRight.transform_top_face(current_front, Axes.VERTICAL, is_left=is_rotate_left, is_test=is_test)
         
-        def transform_bottom_face(current_front, is_rotate_left=True, is_test=False):
+        def transform_bottom_face(current_front: Face, is_rotate_left: bool = True, is_test: bool = False) -> np.ndarray:
             return GridTransformations.LeftAndRight.transform_bottom_face(current_front, Axes.VERTICAL, is_left=is_rotate_left, is_test=is_test)
         
-        def transform_front_back_left_right_faces(current_front, orientation, is_rotate_left=True, is_top_row=True, is_test=False):
+        def transform_front_back_left_right_faces(current_front: Face, orientation: str, is_rotate_left: bool = True, is_top_row: bool = True, is_test: bool = False) -> np.ndarray:
             if orientation == Orientation.FRONT:
                 face = current_front.copy()
             elif orientation == Orientation.BACK:
@@ -202,7 +211,8 @@ class GridTransformations:
         
         # * GRID TRANSFORMATIONS FOR UP & DOWN ROTATIONS
         
-        def transform_left_face(current_front, is_rotate_down=True, is_test=False):
+        # UnitTest Added
+        def transform_left_face(current_front: Face, is_rotate_down: bool = True, is_test: bool = False) -> np.ndarray:
             left_face = current_front.left.copy()
             old_face = left_face.copy()
             
@@ -226,7 +236,8 @@ class GridTransformations:
                 
             return left_face.grid
         
-        def transform_right_face(current_front, is_rotate_down, is_test=False):
+        # UnitTest Added
+        def transform_right_face(current_front: Face, is_rotate_down: bool = True, is_test: bool = False) -> np.ndarray:
             right_face = current_front.right.copy()
             old_face = right_face.copy()
             
@@ -250,7 +261,8 @@ class GridTransformations:
                 
             return right_face.grid
         
-        def transform_back_face(current_front, is_rotate_down=True, is_test=False):
+        # UnitTest Added
+        def transform_back_face(current_front: Face, is_rotate_down: bool = True, is_test: bool = False) -> np.ndarray:
             back_face = current_front.opposite.copy()
             old_face = back_face.copy()
             
@@ -274,7 +286,8 @@ class GridTransformations:
             
             return back_face.grid
         
-        def transform_top_face(current_front, is_rotate_down=True, is_test=False):
+        # UnitTest Added
+        def transform_top_face(current_front: Face, is_rotate_down: bool = True, is_test: bool = False) -> np.ndarray:
             top_face = current_front.top.copy()
             old_face = top_face.copy()
             
@@ -293,7 +306,8 @@ class GridTransformations:
             
             return top_face.grid
         
-        def transform_bottom_face(current_front, is_rotate_down=True, is_test=False):
+        # UnitTest Added
+        def transform_bottom_face(current_front: Face, is_rotate_down: bool = True, is_test: bool = False) -> np.ndarray:
             bottom_face = current_front.bottom.copy()
             old_face = bottom_face.copy()
             
@@ -317,7 +331,8 @@ class GridTransformations:
         
         # * GRID TRANSFORMATIONS FOR LEFT & RIGHT ROTATIONS
         
-        def transform_left_face(current_front, axis, is_left=True, is_test=False):
+        # UnitTest Added
+        def transform_left_face(current_front: Face, axis: str, is_left: bool = True, is_test: bool = False) -> np.ndarray:
             left_face = current_front.left.copy()
             old_face = left_face.copy()
             
@@ -342,7 +357,8 @@ class GridTransformations:
             
             return left_face.grid
         
-        def transform_right_face(current_front, axis, is_left=True, is_test=False):
+        # UnitTest Added
+        def transform_right_face(current_front: Face, axis: str, is_left: bool = True, is_test: bool = False) -> np.ndarray:
             right_face = current_front.right.copy()
             old_face = right_face.copy()
             
@@ -367,7 +383,8 @@ class GridTransformations:
             
             return right_face.grid
         
-        def transform_front_face(current_front, axis, is_left=True, is_test=False):
+        # UnitTest Added
+        def transform_front_face(current_front: Face, axis: str, is_left: bool = True, is_test: bool = False) -> np.ndarray:
             front_face = current_front.copy()
             old_face = front_face.copy()
             
@@ -392,7 +409,8 @@ class GridTransformations:
             
             return front_face.grid
         
-        def transform_back_face(current_front, axis, is_left=True, is_test=False):
+        # UnitTest Added
+        def transform_back_face(current_front: Face, axis: str, is_left: bool = True, is_test: bool = False) -> np.ndarray:
             back_face = current_front.opposite.copy()
             old_face = back_face.copy()
             
@@ -417,7 +435,8 @@ class GridTransformations:
 
             return back_face.grid
         
-        def transform_top_face(current_front, axis, is_left=True, is_test=False):
+        # UnitTest Added
+        def transform_top_face(current_front: Face, axis: str, is_left: bool = True, is_test: bool = False) -> np.ndarray:
             top_face = current_front.top.copy()
             old_face = top_face.copy()
             
@@ -453,7 +472,8 @@ class GridTransformations:
             
             return top_face.grid
         
-        def transform_bottom_face(current_front, axis, is_left=True, is_test=False):
+        # UnitTest Added
+        def transform_bottom_face(current_front: Face, axis: str, is_left: bool = True, is_test: bool = False) -> np.ndarray:
             bottom_face = current_front.bottom.copy()
             old_face = bottom_face.copy()
             
@@ -482,7 +502,8 @@ class GridTransformations:
         
         # * GRID TRANSFORMATIONS FOR CUBE INVERSION
         
-        def transform_left_face(current_front, axis, is_test=False):
+        # UnitTest Added
+        def transform_left_face(current_front: Face, axis: str, is_test: bool = False) -> np.ndarray:
             left_face = current_front.left.copy()
             old_face = left_face.copy()
             
@@ -501,7 +522,8 @@ class GridTransformations:
             
             return left_face.grid
         
-        def transform_right_face(current_front, axis, is_test=False):
+        # UnitTest Added
+        def transform_right_face(current_front: Face, axis: str, is_test: bool = False) -> np.ndarray:
             right_face = current_front.right.copy()
             old_face = right_face.copy()
             
@@ -520,7 +542,8 @@ class GridTransformations:
         
             return right_face.grid
         
-        def transform_top_face(current_front, axis, is_test=False):
+        # UnitTest Added
+        def transform_top_face(current_front: Face, axis: str, is_test: bool = False) -> np.ndarray:
             top_face = current_front.top.copy()
             old_face = top_face.copy()
             
@@ -543,8 +566,9 @@ class GridTransformations:
             GridTransformations.update_piece_positions(top_face, is_test=is_test)
                 
             return top_face.grid
-                
-        def transform_bottom_face(current_front, axis, is_test=False):
+        
+        # UnitTest Added 
+        def transform_bottom_face(current_front: Face, axis: str, is_test: bool = False) -> np.ndarray:
             bottom_face = current_front.bottom.copy()
             old_face = bottom_face.copy()
             
@@ -568,7 +592,8 @@ class GridTransformations:
             
             return bottom_face.grid
         
-        def transform_front_face(current_front, axis, is_test=False):
+        # UnitTest Added
+        def transform_front_face(current_front: Face, axis: str, is_test: bool = False) -> np.ndarray:
             front_face = current_front.copy()
             old_face = front_face.copy()
             
@@ -587,7 +612,8 @@ class GridTransformations:
             
             return front_face.grid
         
-        def transform_back_face(current_front, axis, is_test=False):
+        # UnitTest Added
+        def transform_back_face(current_front: Face, axis: str, is_test: bool = False) -> np.ndarray:
             back_face = current_front.opposite.copy()
             old_face = back_face.copy()
             
@@ -613,7 +639,7 @@ class FaceTransformations:
         
         # * FACE TRANSFORMATIONS FOR UP & DOWN ROTATIONS
     
-        def transform_right_face(current_front, is_rotate_down=True):
+        def transform_right_face(current_front: Face, is_rotate_down: bool = True) -> Face:
             right_face = current_front.right.copy()
             old_face = right_face.copy()
             
@@ -632,7 +658,7 @@ class FaceTransformations:
             
             return right_face
         
-        def transform_left_face(current_front, is_rotate_down=True):
+        def transform_left_face(current_front: Face, is_rotate_down: bool = True) -> Face:
             left_face = current_front.left.copy()
             old_face = left_face.copy()
             
@@ -651,7 +677,7 @@ class FaceTransformations:
             
             return left_face
         
-        def transform_front_back_faces(current_front, is_front=True, is_rotate_down=True):
+        def transform_front_back_faces(current_front: Face, is_front: bool = True, is_rotate_down: bool = True) -> Face:
             if is_front:
                 face = current_front.copy()
             else:
@@ -682,7 +708,7 @@ class FaceTransformations:
             
             return face
         
-        def transform_top_bottom_faces(current_front, is_top=True, is_rotate_down=True):
+        def transform_top_bottom_faces(current_front: Face, is_top: bool = True, is_rotate_down: bool = True) -> Face:
             if is_top:
                 face = current_front.top.copy()
             else:
@@ -717,7 +743,7 @@ class FaceTransformations:
         
         # * FACE TRANSFORMATIONS FOR LEFT & RIGHT ROTATIONS
         
-        def transform_right_face(current_front, is_left=False):
+        def transform_right_face(current_front: Face, is_left: bool = False) -> Face:
             right_face = current_front.right.copy()
             old_face = right_face.copy()
             
@@ -738,7 +764,7 @@ class FaceTransformations:
                 
             return right_face
         
-        def transform_left_face(current_front, is_left=False):
+        def transform_left_face(current_front: Face, is_left: bool = False) -> Face:
             left_face = current_front.left.copy()
             old_face = left_face.copy()
             
@@ -759,7 +785,7 @@ class FaceTransformations:
                 
             return left_face
         
-        def transform_front_back_faces(current_front, is_front=True, is_left=True):
+        def transform_front_back_faces(current_front: Face, is_front: bool = True, is_left: bool = True) -> Face:
             if is_front:
                 face = current_front.copy()
             else:
@@ -796,7 +822,7 @@ class FaceTransformations:
                     
             return face
         
-        def transform_top_bottom_faces(current_front, axis, is_top=True, is_left=True):
+        def transform_top_bottom_faces(current_front: Face, axis: str, is_top: bool = True, is_left: bool = True) -> Face:
             if is_top:
                 face = current_front.top.copy()
             else:
@@ -851,7 +877,7 @@ class FaceTransformations:
         
         # * FACE TRANSFORMATIONS FOR CUBE INVERSION
         
-        def transform_top_bottom_faces(current_front, axis, is_top=True):
+        def transform_top_bottom_faces(current_front: Face, axis: str, is_top: bool = True) -> Face:
             if is_top:
                 face = current_front.top.copy()
             else:
@@ -871,7 +897,7 @@ class FaceTransformations:
             
             return face
         
-        def transform_front_back_faces(current_front, is_front=True):
+        def transform_front_back_faces(current_front: Face, is_front: bool = True) -> Face:
             if is_front:
                 face = current_front.copy()
             else:
@@ -887,7 +913,7 @@ class FaceTransformations:
             
             return face
         
-        def transform_right_left_faces(current_front, is_left_face=True):
+        def transform_right_left_faces(current_front: Face, is_left_face: bool = True) -> Face:
             if is_left_face:
                 face = current_front.left.copy()
             else:

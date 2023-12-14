@@ -1,17 +1,23 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import random
 import math
 import Predicates
 from Transformations import FaceTransformations, GridTransformations
 from Constraints import Axes, FacePositions, Orientation, PossibleOperations
 
+if TYPE_CHECKING:
+    from cube_init import RubixCube, Face, Piece, CornerPiece, EdgePiece
 
-def shuffle_cube(cube=None, axis=None, current_front=None):
+
+def shuffle_cube(cube: RubixCube = None, axis: str = None, current_front: Face = None) -> tuple(list, list):
     op_stack = []
+    error_stack = []
     num_operations = round(math.pow(random.randint(10, 100), (random.random()*2)))
     print(num_operations)
     rotations = PossibleOperations.MOVES[:8]
     shifts = PossibleOperations.MOVES[8:16]
-    for i in range(30):
+    for i in range(num_operations):
         if i%10 == 0:
             random_index = random.randrange(0, len(rotations))
             operation = rotations[random_index]
@@ -23,19 +29,22 @@ def shuffle_cube(cube=None, axis=None, current_front=None):
 
         op, op_kwargs = cube.kwargs_dict[operation]
         # print(op, op_kwargs)
-        try:
-            op(**op_kwargs)
-        except:
-            continue
+        # try:
+        #     op(**op_kwargs)
+        #     op_stack.append(operation)
+        # except:
+        #     error_stack.append(operation)
+        #     continue
+        op(**op_kwargs)
         op_stack.append(operation)
     
-    return op_stack
+    return op_stack, error_stack
 
 
 class Shifts:
     
     # Defining the methods for each operation
-    def right_column_up(current_front=None, axis=None, cube=None):
+    def right_column_up(current_front: Face = None, axis: str = None, cube: RubixCube = None) -> None:
         current = current_front
         
         ## Getting new Right Face Grid
@@ -56,7 +65,7 @@ class Shifts:
         current.top.grid = new_top_grid
         current.bottom.grid = new_bottom_grid
     
-    def left_column_up(current_front=None, axis=None, cube=None):
+    def left_column_up(current_front: Face = None, axis: str = None, cube: RubixCube = None) -> None:
         current = current_front
         
         ## Getting new Left Face Grid
@@ -77,7 +86,7 @@ class Shifts:
         current.top.grid = new_top_grid
         current.bottom.grid = new_bottom_grid
     
-    def right_column_down(current_front=None, axis=None, cube=None):
+    def right_column_down(current_front: Face = None, axis: str = None, cube: RubixCube = None) -> None:
         current = current_front
         
         ## Getting new Right Face Grid
@@ -98,7 +107,10 @@ class Shifts:
         current.top.grid = new_top_grid
         current.bottom.grid = new_bottom_grid
     
-    def left_column_down(current_front=None, axis=None, cube=None):
+    def left_column_down(current_front: Face = None, axis: str = None, cube: RubixCube = None) -> None:
+        
+        #! Error flow: left_column_down -> ColumnUpAndDown.transform_front_face (Type: AttributeError - NoneType object has no attribute copy)
+        
         current = current_front
         
         ## Getting transformed Left Face Grid
@@ -119,7 +131,7 @@ class Shifts:
         current.top.grid = new_top_grid
         current.bottom.grid = new_bottom_grid
     
-    def top_row_right(current_front=None, axis=None, cube=None):
+    def top_row_right(current_front: Face = None, axis: str = None, cube: RubixCube = None) -> None:
         current = current_front
         
         ## Getting transformed Top Grids
@@ -140,7 +152,7 @@ class Shifts:
         current.opposite.grid = new_back_grid
         current.top.grid = new_top_grid
 
-    def top_row_left(current_front=None, axis=None, cube=None):
+    def top_row_left(current_front: Face = None, axis: str = None, cube: RubixCube = None) -> None:
         current = current_front
         
         ## Getting transformed Top Grids
@@ -161,7 +173,7 @@ class Shifts:
         current.opposite.grid = new_back_grid
         current.top.grid = new_top_grid
     
-    def bottom_row_right(current_front=None, axis=None, cube=None):
+    def bottom_row_right(current_front: Face = None, axis: str = None, cube: RubixCube = None) -> None:
         current = current_front
         
         ## Getting transformed Top Grids
@@ -182,7 +194,7 @@ class Shifts:
         current.opposite.grid = new_back_grid
         current.bottom.grid = new_bottom_grid
     
-    def bottom_row_left(current_front=None, axis=None, cube=None):
+    def bottom_row_left(current_front: Face = None, axis: str = None, cube: RubixCube = None) -> None:
         current = current_front
         
         ## Getting transformed Top Grids
@@ -217,7 +229,7 @@ class Shifts:
 
 class Rotations:
     
-    def rotate_left(cube=None, axis=None, current_front=None):
+    def rotate_left(cube: RubixCube = None, axis: str = None, current_front: Face = None) -> None:
         """
         * This method performs the operation of rotating the cube leftwards. It makes calls to get the 
         * transformed faces of the cube. These values are then transferred into the existing Face object.
@@ -291,7 +303,7 @@ class Rotations:
             Rotations.transfer_faces(cube.current_perspective.bottom, new_left_face)
             Rotations.transfer_faces(cube.current_perspective.opposite, new_back_face)
             
-    def rotate_right(cube=None, axis=None, current_front=None):
+    def rotate_right(cube: RubixCube = None, axis: str = None, current_front: Face = None) -> None:
         """
         * This method performs the operation of rotating the cube rightwards. It makes calls to get the 
         * transformed faces of the cube. These values are then transferred into the existing Face object.
@@ -362,7 +374,7 @@ class Rotations:
             Rotations.transfer_faces(cube.current_perspective.bottom, new_right_face)
             Rotations.transfer_faces(cube.current_perspective.opposite, new_back_face)
             
-    def rotate_up(cube=None, axis=None, current_front=None):
+    def rotate_up(cube: RubixCube = None, axis: str = None, current_front: Face = None) -> None:
         """
         * This method performs the operation of rotating the cube upwards. It makes calls to get the 
         * transformed faces of the cube. These values are then transferred into the existing Face object.
@@ -414,7 +426,7 @@ class Rotations:
         Rotations.transfer_faces(cube.current_perspective.bottom, new_back_face)
         Rotations.transfer_faces(cube.current_perspective.opposite, new_top_face)
     
-    def rotate_down(cube=None, axis=None, current_front=None):
+    def rotate_down(cube: RubixCube = None, axis: str = None, current_front: Face = None) -> None:
         """
         * This method performs the operation of rotating the cube downwards. It makes calls to get the 
         * transformed faces of the cube. These values are then transferred into the existing Face object.
@@ -466,7 +478,7 @@ class Rotations:
         Rotations.transfer_faces(cube.current_perspective.bottom, new_front_face)
         Rotations.transfer_faces(cube.current_perspective.opposite, new_bottom_face)
     
-    def invert_cube(cube=None, axis=None, current_front=None):
+    def invert_cube(cube: RubixCube = None, axis: str = None, current_front: Face = None) -> None:
         """
         * This method performs the operation of inverting the cube. It makes calls to get the 
         * transformed faces of the cube. These values are then transferred into the existing Face object.
@@ -541,7 +553,7 @@ class Rotations:
             Rotations.transfer_faces(cube.current_perspective.bottom, new_top_face)
             Rotations.transfer_faces(cube.current_perspective.opposite, new_front_face)
             
-    def reset_perspective(cube=None, axis=None, current_front=None):
+    def reset_perspective(cube: RubixCube = None, axis: str = None, current_front: Face = None) -> None:
         iters = 0
         while True:
             if Predicates.FacePredicates.is_correct_perspective(cube):
@@ -568,7 +580,7 @@ class Rotations:
                         cube.move(PossibleOperations.ROTATE_LEFT_HORIZONTALLY)
                 iters += 1
     
-    def get_orientation(cube):
+    def get_orientation(cube: RubixCube) -> str:
         if Predicates.FacePredicates.are_faces_equal(cube.current_perspective.top, cube.blue_face):
             return Orientation.TOP
         elif Predicates.FacePredicates.are_faces_equal(cube.current_perspective.right, cube.blue_face):
@@ -580,7 +592,7 @@ class Rotations:
         elif Predicates.FacePredicates.are_faces_equal(cube.current_perspective.opposite, cube.blue_face):
             return Orientation.BACK
     
-    def transfer_faces(old, new):
+    def transfer_faces(old: Face, new: Face) -> None:
         """
         *This method transplants values from the copied face object to the original face object of the cube.
         

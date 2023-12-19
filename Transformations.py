@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import numpy as np
 from Constraints import Axes, FacePositions, Orientation
+import icecream as ic
 
 if TYPE_CHECKING:
     from cube_init import RubixCube, Face, Piece, CornerPiece, EdgePiece
@@ -136,6 +137,7 @@ class GridTransformations:
             
             return bottom_face.grid
         
+        # Added UnitTest
         def transform_back_face(current_front: Face, is_rotate_down: bool = True, is_right_col: bool = True, is_test: bool = False) -> np.ndarray:
             back_face = current_front.opposite.copy()
             old_face = back_face.copy()
@@ -167,9 +169,11 @@ class GridTransformations:
     class RowRightAndLeft:
         
         def transform_top_face(current_front: Face, is_rotate_left: bool = True, is_test: bool = False) -> np.ndarray:
+            ic.ic(current_front)
             return GridTransformations.LeftAndRight.transform_top_face(current_front, Axes.VERTICAL, is_left=is_rotate_left, is_test=is_test)
         
         def transform_bottom_face(current_front: Face, is_rotate_left: bool = True, is_test: bool = False) -> np.ndarray:
+            ic.ic(current_front)
             return GridTransformations.LeftAndRight.transform_bottom_face(current_front, Axes.VERTICAL, is_left=is_rotate_left, is_test=is_test)
         
         def transform_front_back_left_right_faces(current_front: Face, orientation: str, is_rotate_left: bool = True, is_top_row: bool = True, is_test: bool = False) -> np.ndarray:

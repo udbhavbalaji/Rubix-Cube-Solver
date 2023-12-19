@@ -566,6 +566,7 @@ class TestFaceGridColShiftsUpDown(unittest.TestCase):
     def setUp(self):
         self.face = Face(Colours.BLUE)
         self.front = Face(Colours.WHITE)
+        self.from_col_face = Face(Colours.RED)
         self.test_grid = [
             [1, 2, 3],
             [4, 5, 6],
@@ -573,6 +574,7 @@ class TestFaceGridColShiftsUpDown(unittest.TestCase):
         ]
         self.face.grid = np.array(self.test_grid)
         self.front.grid = np.array(self.test_grid)
+        self.from_col_face.grid = np.array(self.test_grid)
     
     def tearDown(self):
         pass
@@ -644,7 +646,66 @@ class TestFaceGridColShiftsUpDown(unittest.TestCase):
         
         self.assertTrue(GridPredicates.are_grids_equal(result_front_face_left_col_up_grid, np.array(self.test_grid)))
         self.assertTrue(GridPredicates.are_grids_equal(result_front_face_right_col_up_grid, np.array(self.test_grid)))
+        
+    def test_transform_back_face_col_shift_up(self):
+        # YOUR CODE HERE
+        self.front.opposite = self.face
+        self.face.opposite = self.front
+        self.face.top = self.from_col_face
+        self.front.top = self.from_col_face
+        self.from_col_face.front = self.front
+        self.from_col_face.back = self.face
+        
+        expected_back_face_right_col_up_grid = [
+            [9, 2, 3],
+            [6, 5, 6],
+            [3, 8, 9]
+        ]
+        expected_back_face_left_col_up_grid = [
+            [1, 2, 7],
+            [4, 5, 4],
+            [7, 8, 1]
+        ]
+        
+        result_back_face_right_col_up_grid = GridTransformations.ColumnUpAndDown.transform_back_face(self.front, is_rotate_down=False, is_right_col=True, is_test=True)
+        result_back_face_left_col_up_grid = GridTransformations.ColumnUpAndDown.transform_back_face(self.front, is_rotate_down=False, is_right_col=False, is_test=True)
+        
+        self.assertTrue(GridPredicates.are_grids_equal(result_back_face_right_col_up_grid, np.array(expected_back_face_right_col_up_grid)))
+        self.assertTrue(GridPredicates.are_grids_equal(result_back_face_left_col_up_grid, np.array(expected_back_face_left_col_up_grid)))
+        
+        self.assertFalse(GridPredicates.are_grids_equal(result_back_face_right_col_up_grid, np.array(expected_back_face_left_col_up_grid)))
+        self.assertFalse(GridPredicates.are_grids_equal(result_back_face_left_col_up_grid, np.array(expected_back_face_right_col_up_grid)))
 
+    def test_transform_back_face_col_shift_down(self):
+        # YOUR CODE HERE
+        self.front.opposite = self.face
+        self.face.opposite = self.front
+        self.front.bottom = self.from_col_face
+        self.face.bottom = self.from_col_face
+        self.from_col_face.front = self.front
+        self.from_col_face.back = self.face
+        
+        expected_back_face_right_col_down_grid = [
+            [9, 2, 3],
+            [6, 5, 6],
+            [3, 8, 9]
+        ]
+        expected_back_face_left_col_down_grid = [
+            [1, 2, 7],
+            [4, 5, 4],
+            [7, 8, 1]
+        ]
+        
+        result_back_face_right_col_down_grid = GridTransformations.ColumnUpAndDown.transform_back_face(self.front, is_rotate_down=True, is_right_col=True, is_test=True)
+        result_back_face_left_col_down_grid = GridTransformations.ColumnUpAndDown.transform_back_face(self.front, is_rotate_down=True, is_right_col=False, is_test=True)
+        
+        self.assertTrue(GridPredicates.are_grids_equal(result_back_face_left_col_down_grid, np.array(expected_back_face_left_col_down_grid)))
+        self.assertTrue(GridPredicates.are_grids_equal(result_back_face_right_col_down_grid, np.array(expected_back_face_right_col_down_grid)))
+        
+        self.assertFalse(GridPredicates.are_grids_equal(result_back_face_left_col_down_grid, np.array(expected_back_face_right_col_down_grid)))
+        self.assertFalse(GridPredicates.are_grids_equal(result_back_face_right_col_down_grid, np.array(expected_back_face_left_col_down_grid)))
+        
+        pass
 
     
     pass

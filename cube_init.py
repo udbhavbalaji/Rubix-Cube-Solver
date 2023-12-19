@@ -10,6 +10,7 @@ import random
 # Importing (from) local modules
 from Constraints import Axes, Colours, FacePositions, Orientation, PieceType, PossibleOperations
 from Operations import shuffle_cube, OPERATIONS
+from errors import IncorrectTypeError, ArgumentTypeError
 
 class RubixCube():
     
@@ -135,7 +136,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         back_grid = self.get_2D_cube_grid(front.opposite, Orientation.BACK)
         front_grid = self.get_2D_cube_grid(front, Orientation.FRONT)
         
-        output = f'      ______\n'
+        output = f'     _______\n'
         output += f'     !{left_grid[0]}|\n     !{left_grid[1]}|\n     !{left_grid[2]}|\n'
         output += '________________________\n'
         output += f'{front_grid[0]}|{bottom_grid[0]}|{back_grid[0]}|{top_grid[0]}|\n'
@@ -143,7 +144,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         output += f'{front_grid[2]}|{bottom_grid[2]}|{back_grid[2]}|{top_grid[2]}|\n'
         output += '________________________\n'
         output += f'     !{right_grid[0]}|\n     !{right_grid[1]}|\n     !{right_grid[2]}|\n'
-        output += f'      ______'
+        output += f'     -------'
         
         return output
             
@@ -156,23 +157,20 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
             kwargs_dict (dict): A dictionary containing tuples for each possible operation. The 
                                 tuple contains the operation function and the corresponding kwargs.
         """
+        #! ERROR: current_front always points to blue_face (since init) for all appropriate functions (meaning that we are not providing the front at that time, but the front at initialization of the cube)
         kwargs_template = {
             'cube': None,
-            'axis': None,
-            'current_front': None
+            'axis': None
         }
         kwargs_dict = {}
         
         for i in range(len(PossibleOperations.MOVES)):
             kwargs = kwargs_template.copy()
-            if i < 8 or i > 15:
-                kwargs['cube'] = self
-                if i in [0, 1, 6]:
-                    kwargs['axis'] = Axes.VERTICAL
-                elif i in [4, 5, 7]:
-                    kwargs['axis'] = Axes.HORIZONTAL
-            else:
-                kwargs['current_front'] = self.current_perspective
+            kwargs['cube'] = self
+            if i in [0, 1, 6]:
+                kwargs['axis'] = Axes.VERTICAL
+            elif i in [4, 5, 7]:
+                kwargs['axis'] = Axes.HORIZONTAL
                 
             operation = OPERATIONS[i]
             kwargs_dict[PossibleOperations.MOVES[i]] = (operation, kwargs)
@@ -337,8 +335,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
         self.move(PossibleOperations.ROTATE_DOWN, verbose=False)
         # White Face
         self.assign_complements(self.current_perspective)
-        self.move(PossibleOperations.ROTATE_DOWN, verbose=False)
-        self.move(PossibleOperations.ROTATE_DOWN, verbose=False)
+        self.move(PossibleOperations.INVERT_CUBE_HORIZONTALLY, verbose=False)
         # Yellow Face
         self.assign_complements(self.current_perspective)
         
@@ -621,7 +618,6 @@ class Piece:
         """
         self.face_position = face_position
         self.face = face
-        self._colour = self.face.center_colour
         self._piece_type = piece_type
         
     @property
@@ -633,7 +629,7 @@ class Piece:
         Returns:
             str: String literal storing the piece instance's colour
         """
-        return self._colour
+        return self.face.center_colour
     
     @property
     def piece_type(self) -> str:
@@ -698,6 +694,13 @@ class EdgePiece(Piece):
         """
         self._complement = new_complement
         
+    @property
+    def num_complements(self) -> int:
+        if self.complement is None:
+            return 0
+        else:
+            return 1
+        
         
 class CornerPiece(Piece):
     
@@ -750,13 +753,25 @@ class CornerPiece(Piece):
             new_complements (tuple): a tuple containing pointers to the Piece instances that are the current
                                      Piece instance's complements.
         """
-        self._complements = new_complements
+        if type(new_complements) == tuple:
+            self._complements = new_complements
+        else:
+            raise IncorrectTypeError('Cannot add non-tuple type to CornerPiece()._complements!')
+        
+    @property
+    def num_complements(self):
+        return len(self.complements)
     
     
 if __name__ == "__main__":
     cube = RubixCube()
-    op_stack, error_stack = cube.move(PossibleOperations.SHUFFLE_CUBE)
+    # op_stack, error_stack = cube.move(PossibleOperations.SHUFFLE_CUBE)
     print(cube)
-    print(op_stack)
-    print(error_stack)
+    # print(op_stack)
+    # print(error_stack)
+    cube.move(PossibleOperations.TOP_ROW_LEFT)
+    print(cube)
+    # print(type(cube.current_perspective.grid[FacePositions.TOP_LEFT]) == Piece)
+    # cube.move(PossibleOperations.ROTATE_DOWN)
+    # print(cube)
     

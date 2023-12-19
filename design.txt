@@ -1,0 +1,84 @@
+                                                    INITIAL THGOUGHTS
+
+Complex Types (Classes):
+
+1. RubixCube: {
+    attrs: {
+        current_perspective: Face,
+        blue_face: Face,
+        red_face: Face
+        orange_face: Face,
+        yellow_face: Face,
+        green_face: Face,
+        white_face: Face,
+        _kwargs_dict: dict --> to be moved into the file with the operations (rotations and shifts). Doesn't have to be part of this class 
+    },
+    methods: {
+        copy: Creates a copy of the current instance, --> Broken down further in future sections
+        init_cube: Creates cube structure,  --> Broken down further in future sections
+        assign_complements: Assigns complement piece for each piece, --> Broken down further in future sections
+        shuffle_cube: Shuffles cube, --> Broken down further in future sections
+        move/perform_operation/?BetterName?: Does the required operation, --> Broken down further in future sections
+        validity_check: Makes sure that any operation doesn't break the integrity of the cube, --> Will be implemented soon, and broken down further in future sections
+        user_input_cube: Takes in user's cube as input through console, --> To be implemented in future versions
+        user_controlled_cube: Init cube and allow user to perform operation, with live update to cube --> To be implemented in future versions
+    },
+    properties: {
+        kwargs_dict: dict --> to be moved along with _kwargs_dict,
+        (possibly in the future)
+        blue_face: Face, --> Might be added to properties instead of attributes since they aren't changed after initialization
+        red_face: Face, --> Might be added to properties instead of attributes since they aren't changed after initialization
+        orange_face: Face, --> Might be added to properties instead of attributes since they aren't changed after initialization
+        yellow_face: Face, --> Might be added to properties instead of attributes since they aren't changed after initialization
+        green_face: Face, --> Might be added to properties instead of attributes since they aren't changed after initialization
+        white_face: Face --> Might be added to properties instead of attributes since they aren't changed after initialization
+    }
+}
+2. Face: {
+    attrs: {
+        center_colour: Colours,
+        right: Face,
+        left: Face,
+        top: Face,
+        bottom: Face,
+        front: Face,
+        back:Face,
+        opposite: Face,
+        is_side_face: bool,
+        grid: numpy.ndarray
+    },
+    methods: {
+        copy: Creates a copy of the current instance, --> Broken down further in future sections
+        init_pieces: Creates pieces and populates them into a 2D array, --> Broken down further in future sections
+        validity_check: Makes sure that any operation doesn't break the integrity of the face, --> Will be implemented soon, and broken down further in future sections
+    },
+    properties: {
+        None so far!
+        (possibly in the future)
+        center_colour: Colours --> Can be stored as property since the value can't be changed after init
+    }
+}
+3. Piece(ABC):{
+    methods: {
+        face_validity_check: Makes sure that any operation doesn't incorrectly update face attribute, --> Will be implemented soon and broken down further in future sections
+        face_position_validity_check: Makes sure that all operations correctly updates piece's face_position attribute --> Will be implemented soon and broken down further in future sections
+    }
+}
+4. CenterPiece: {
+    attrs:{
+
+    }
+}
+5. EdgePiece: {
+    attrs: {
+
+    }
+}
+6. CornerPiece: {
+    attrs: {
+
+    }
+}
+
+RubixCube:
+

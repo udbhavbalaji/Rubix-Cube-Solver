@@ -60,31 +60,49 @@ class FacePredicates:
 class GridPredicates:
     
     def are_grids_equal(grid_one: np.ndarray, grid_two: np.ndarray) -> bool:
-        try:
-            for position in FacePositions.POSITIONS:
-                if grid_one[position] != grid_two[position]:
-                    return False
-            return True
-        except ArgumentTypeError:
-            raise ArgumentTypeError('Datatype Received is incorrect!')
+        if type(grid_one) != np.ndarray or type(grid_two) != np.ndarray:
+            raise ArgumentTypeError('Didn\'t receive correct DataType. Must be of type numpy.ndarray!')
+        for position in FacePositions.POSITIONS:
+            if grid_one[position] != grid_two[position]:
+                return False
+            
+        return True
+        # try:
+        #     for position in FacePositions.POSITIONS:
+        #         if grid_one[position] != grid_two[position]:
+        #             return False
+        #     return True
+        # except ArgumentTypeError:
+        #     raise ArgumentTypeError('Datatype Received is incorrect!')
     
     pass
 
 
 class PiecePredicates:
-    
+    # Added UnitTest
     def are_pieces_equal(piece_one: Piece, piece_two: Piece) -> bool:
         return piece_one == piece_two
     
+    # Added UnitTest
     def is_edge_piece(piece: Piece) -> bool:
         return piece.piece_type == PieceType.EDGE
     
+    # Added UnitTest
     def is_corner_piece(piece: Piece) -> bool:
         return piece.piece_type == PieceType.CORNER
     
+    # Added UnitTest
     def is_center_piece(piece: Piece) -> bool:
         return piece.piece_type == PieceType.CENTER
     
-    def is_num_complements_corner_correct(piece):
-        # return get_count_complements(piece) == 2
-        pass
+    # Added UnitTest
+    def is_num_complements_corner_correct(piece: Piece) -> bool:
+        if type(piece) != CornerPiece:
+            raise ArgumentTypeError('Must Pass CornerPiece! Incorrect Argument Type!')
+        return piece.get_count_complements() == 2
+    
+    # Added UnitTest
+    def is_num_complements_edge_correct(piece: Piece) -> bool:
+        if type(piece) != Piece:
+            raise ArgumentTypeError('Must Pass EdgePiece! Incorrect Argument Type!')
+        return piece.get_count_complements() == 1

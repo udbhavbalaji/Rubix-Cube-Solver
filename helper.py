@@ -9,20 +9,23 @@ def get_num_edge_pieces(face):
         pass
     pass
 
-def get_count_complements(piece):
-    if piece.piece_type == PieceType.CORNER:
-        try:
-            if len(piece.complements) == 2:
-                return 2
-            else:
-                raise ValueError(f'Number of complements = {len(piece.complements)} ≠ 2')
-        except(TypeError):
-            raise TypeError(f'Received Type: {piece}\nExpected Type: tuple')
-    elif piece.piece_type == PieceType.EDGE:
+# def get_count_complements(piece):
+#     if piece.piece_type == PieceType.CORNER:
+#         try:
+#             if len(piece.complements) == 2:
+#                 return 2
+#             else:
+#                 raise ValueError(f'Number of complements = {len(piece.complements)} ≠ 2')
+#         except(TypeError):
+#             raise TypeError(f'Received Type: {piece}\nExpected Type: tuple')
+#     elif piece.piece_type == PieceType.EDGE:
         
-        pass
-    else:
-        pass
+#         pass
+#     else:
+#         pass
+#     pass
+
+def get_count_complements(piece):
     pass
 
 

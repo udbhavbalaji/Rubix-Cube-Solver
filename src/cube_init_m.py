@@ -1,5 +1,10 @@
+"""
+This module contains the RubixCube, Face, Piece, EdgePiece and CornerPiece classes. It creates a Rubix Cube, 
+allowing all possible operations that can be done to a Rubix Cube in real life.
+"""
+
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Union
 import numpy as np
 from constants import (
     Colours,
@@ -8,24 +13,64 @@ from constants import (
     PieceType,
     PossibleRotations,
     PossibleShifts,
-    COLOURS,
     POSSIBLE_ROTATIONS,
     POSSIBLE_SHIFTS,
 )
 from operations import Operation, Rotations, Shifts, ROTATIONS, SHIFTS
 from predicate import CubePredicate, FacePredicate
-from error import InvalidOperationError
+from error import CubeIntegrityError, InvalidOperationError
+from validity_check import CubeValidity
+import helper as hp
+import icecream as ic
 
 
 class RubixCube:
-    PRINT_DICT = {
-        Colours.BLUE: "B",
-        Colours.RED: "R",
-        Colours.ORANGE: "O",
-        Colours.WHITE: "W",
-        Colours.GREEN: "G",
-        Colours.YELLOW: "Y",
-    }
+
+    """
+    This is a class representing the Rubix Cube. A cube has 6 faces (type=FaceObject). It is initialized with the blue
+    face in front, red face on the left, orange face on the right, green face on the back, white face
+    on the top and yellow face on the bottom.
+
+    All side faces (Front, Left, Right, Back) have Face().top set as the top (white) face and Face().bottom set as the
+    bottom (yellow) face. Additionally, for all side faces, accessing the left/right attribute 4 times will bring you back to
+    the initial perspective (hence, making it cyclic). The top (white) and bottom (yellow) faces have Face().top and
+    Face().bottom set to None. To correctly map their representation in the cube, they have Face().front = the current
+    front face and Face().back = the current back face.
+
+    All faces have a 3 X 3 grid holding pieces (type=PieceObject). These are stored in a numpy array. For all side faces,
+    the orientation is identical to face orientations discussed above. For the top (white) face, the top row corresponds to
+    the edge Face().back (green), the left and right columns correspond to edges Face().left (red) and Face().right (orange) and
+    the bottom row corresponds to the edge Face().front (blue). Similarly, for the bottom (yellow) face, the top row corresponds to
+    the edge Face().front (blue), the left and right columns correspond to edges Face().left (red) and Face().right (orange) and
+    the bottom row corresponds to the edge Face().back (green).
+
+    ATTRIBUTES:
+        current_perspective: Pointer to the Face Object that is currently in front
+        blue_face: Pointer to the blue face in the cube
+        white_face: Pointer to the white face in the cube
+        yellow_face: Pointer to the yellow face in the cube
+        red_face: Pointer to the red face in the cube
+        orange_face: Pointer to the orange face in the cube
+        green_face: Pointer to the green face in the cube
+        current_operation: Represents the current operation performed on the cube
+        op_stack: Stack containing all operations performed on the cube
+
+    METHODS:
+        create_cube: Creates the cube structure
+        get_2D_cube_grid: Translates each face's grid into a 2D representation for graphing
+        copy: Creates a duplicate instance of the Cube class with the same values
+        assign_complements: Assigns corresponding complement value for each piece on a face
+        integrity_check: Decorator function that performs integrity checks on the cube after each operation
+        rotate: Performs the specified rotation operation
+        shift: Performs the specified shift operation
+        reset_perspective: Resets cube perspective to get the blue face front and white face top
+        shuffle_cube: Shuffles cube
+
+    PROPERTIES:
+        faces: List of all the faces in the cube
+
+
+    """
 
     def __init__(
         self,
@@ -37,6 +82,18 @@ class RubixCube:
         yellow_face: Face = None,
         is_copy: bool = False,
     ) -> None:
+        """
+        Constructor method for the Cube class.
+
+        Args:
+            blue_face (Face, optional): Face instance for the blue face. Defaults to None.
+            red_face (Face, optional): Face instance for the red face. Defaults to None.
+            orange_face (Face, optional): Face instance for the orange face. Defaults to None.
+            green_face (Face, optional): Face instance for the green face. Defaults to None.
+            white_face (Face, optional): Face instance for the white face. Defaults to None.
+            yellow_face (Face, optional): Face instance for the yellow face. Defaults to None.
+            is_copy (bool, optional): bool to show if current Cube object is copied from another Cube object. Defaults to False.
+        """
         # YOUR CODE HERE
         self.blue_face = blue_face
         self.red_face = red_face
@@ -46,14 +103,58 @@ class RubixCube:
         self.yellow_face = yellow_face
 
         self.current_operation: Optional[Operation] = None
+        self.op_stack: list = []
 
         if not is_copy:
             self.create_cube()
+        else:
+            self.current_perspective = self.blue_face
         pass
 
     # YOUR CODE HERE
 
+    @property
+    def faces(self) -> list[Face]:
+        return [
+            self.blue_face,
+            self.red_face,
+            self.green_face,
+            self.orange_face,
+            self.yellow_face,
+            self.white_face,
+        ]
+
     def __str__(self) -> str:
+        """
+        This method is called to return the string representation of the cube. It is represented as a 2D grid, 
+        as shown below.
+        
+        Every face's grid = [[1, 2, 3],
+                             [4, 5, 6],
+                             [7, 8, 9]]
+                              
+        The output representation is as follows:
+        
+             Left Face
+              _______   Bottom Face
+              |3 2 1|   /
+              |6 5 4|  /
+              |9 8 7| /
+        _____________L___________
+        |1 4 7|1 4 7|9 6 3|1 4 7|
+Front   |2 5 8|2 5 8|8 5 2|2 5 8| Top
+Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
+        -------------------------
+              |7 8 9|   \
+              |4 5 6|    \
+              |1 2 3|    Back Face
+              -------
+             Right Face
+        
+
+        Returns:
+            output (str): A string that is formatted to output the above structure
+        """
         front = self.current_perspective.copy()
 
         left_grid = self.get_2D_cube_grid(front.left, Orientation.LEFT)
@@ -93,28 +194,74 @@ class RubixCube:
             tuple: The tuple contains the string output for each row/column in the grid
         """
         if orientation == Orientation.LEFT:
-            first_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_RIGHT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_CENTER].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_LEFT].colour]}"
-            second_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.MID_RIGHT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.MID_CENTER].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.MID_LEFT].colour]}"
-            third_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_RIGHT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_CENTER].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_LEFT].colour]}"
+            first_row = f"{face.grid[FacePositions.TOP_RIGHT].colour.value[0]} {face.grid[FacePositions.TOP_CENTER].colour.value[0]} {face.grid[FacePositions.TOP_LEFT].colour.value[0]}"
+            second_row = f"{face.grid[FacePositions.MID_RIGHT].colour.value[0]} {face.grid[FacePositions.MID_CENTER].colour.value[0]} {face.grid[FacePositions.MID_LEFT].colour.value[0]}"
+            third_row = f"{face.grid[FacePositions.BOTTOM_RIGHT].colour.value[0]} {face.grid[FacePositions.BOTTOM_CENTER].colour.value[0]} {face.grid[FacePositions.BOTTOM_LEFT].colour.value[0]}"
 
         elif orientation in [Orientation.FRONT, Orientation.BOTTOM, Orientation.TOP]:
-            first_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_LEFT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.MID_LEFT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_LEFT].colour]}"
-            second_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_CENTER].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.MID_CENTER].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_CENTER].colour]}"
-            third_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_RIGHT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.MID_RIGHT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_RIGHT].colour]}"
+            first_row = f"{face.grid[FacePositions.TOP_LEFT].colour.value[0]} {face.grid[FacePositions.MID_LEFT].colour.value[0]} {face.grid[FacePositions.BOTTOM_LEFT].colour.value[0]}"
+            second_row = f"{face.grid[FacePositions.TOP_CENTER].colour.value[0]} {face.grid[FacePositions.MID_CENTER].colour.value[0]} {face.grid[FacePositions.BOTTOM_CENTER].colour.value[0]}"
+            third_row = f"{face.grid[FacePositions.TOP_RIGHT].colour.value[0]} {face.grid[FacePositions.MID_RIGHT].colour.value[0]} {face.grid[FacePositions.BOTTOM_RIGHT].colour.value[0]}"
 
         elif orientation == Orientation.BACK:
-            first_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_RIGHT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.MID_RIGHT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_RIGHT].colour]}"
-            second_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_CENTER].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.MID_CENTER].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_CENTER].colour]}"
-            third_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_LEFT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.MID_LEFT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_LEFT].colour]}"
+            first_row = f"{face.grid[FacePositions.BOTTOM_RIGHT].colour.value[0]} {face.grid[FacePositions.MID_RIGHT].colour.value[0]} {face.grid[FacePositions.TOP_RIGHT].colour.value[0]}"
+            second_row = f"{face.grid[FacePositions.BOTTOM_CENTER].colour.value[0]} {face.grid[FacePositions.MID_CENTER].colour.value[0]} {face.grid[FacePositions.TOP_CENTER].colour.value[0]}"
+            third_row = f"{face.grid[FacePositions.BOTTOM_LEFT].colour.value[0]} {face.grid[FacePositions.MID_LEFT].colour.value[0]} {face.grid[FacePositions.TOP_LEFT].colour.value[0]}"
 
         elif orientation == Orientation.RIGHT:
-            first_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_LEFT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_CENTER].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.BOTTOM_RIGHT].colour]}"
-            second_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.MID_LEFT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.MID_CENTER].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.MID_RIGHT].colour]}"
-            third_row = f"{RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_LEFT].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_CENTER].colour]} {RubixCube.PRINT_DICT[face.grid[FacePositions.TOP_RIGHT].colour]}"
+            first_row = f"{face.grid[FacePositions.BOTTOM_LEFT].colour.value[0]} {face.grid[FacePositions.BOTTOM_CENTER].colour.value[0]} {face.grid[FacePositions.BOTTOM_RIGHT].colour.value[0]}"
+            second_row = f"{face.grid[FacePositions.MID_LEFT].colour.value[0]} {face.grid[FacePositions.MID_CENTER].colour.value[0]} {face.grid[FacePositions.MID_RIGHT].colour.value[0]}"
+            third_row = f"{face.grid[FacePositions.TOP_LEFT].colour.value[0]} {face.grid[FacePositions.TOP_CENTER].colour.value[0]} {face.grid[FacePositions.TOP_RIGHT].colour.value[0]}"
 
         return (first_row, second_row, third_row)
 
     def create_cube(self) -> None:
+        """
+        This method initializes the Rubix Cube. The faces are created, edges are joined and positional attributes
+        assigned. All complements values are assigned for each piece (type=PieceType) in each face (type=FaceType).
+
+        Side Faces Initialization:
+
+                                             (Top)
+                                    (Left Col)   (Right Col)
+                                             ^   ^
+                                             |   |
+                                            _______
+                                            |1 2 3|-> (Top Row)
+                            (Left)          |4 5 6|                  (Right)
+                                            |7 8 9|-> (Bottom Row)
+                                            -------
+
+                                            (Bottom)
+
+        Top Face Initialization:
+
+                                             (Back)
+                                    (Left Col)   (Right Col)
+                                             ^   ^
+                                             |   |
+                                            _______
+                                            |1 2 3|-> (Top Row)
+                            (Left)          |4 5 6|                  (Right)
+                                            |7 8 9|-> (Bottom Row)
+                                            -------
+
+                                            (Front)
+
+        Bottom Face Initialization:
+
+                                             (Front)
+                                    (Left Col)   (Right Col)
+                                             ^   ^
+                                             |   |
+                                            _______
+                                            |1 2 3|-> (Top Row)
+                            (Left)          |4 5 6|                  (Right)
+                                            |7 8 9|-> (Bottom Row)
+                                            -------
+
+                                            (Back)
+        """
         # YOUR CODE HERE
         # Creating the Cube Faces
         self.blue_face = Face(Colours.BLUE, orientation_to_cube=Orientation.FRONT)
@@ -176,8 +323,8 @@ class RubixCube:
         self.white_face.opposite = self.yellow_face
         self.yellow_face.opposite = self.white_face
 
-        # TODO: Assign Complements for Pieces
-        pass
+        ## Initializing complements
+        self.assign_complements()
 
     def copy(self) -> RubixCube:
         # YOUR CODE HERE
@@ -191,41 +338,308 @@ class RubixCube:
             is_copy=True,
         )
 
-    def assign_complements(self, face: Face) -> None:
+    def assign_complements(self) -> None:
+        """
+        This method assigns the complements for each piece in the face. EdgePiece and CornerPiece classes
+        have instance attributes (EdgePiece().complement and CornerPiece().complements respectively) that hold
+        the pointers to the complement pieces.
+
+        Example: Consider an edge piece in between the blue face and white face. According to current perspective,
+        this would make the top_center piece in the front (blue) face and the bottom_center piece in the top (white)
+        face complements. Similarly, in corner pieces, all 3 pieces that make up each corner are each others' complements.
+        """
         # YOUR CODE HERE
-        ## Assigning complements of edge pieces
-        face.grid[FacePositions.TOP_CENTER].complement = face.top.grid[
+        current = self.current_perspective
+
+        # Assigning Edge Piece Complements
+        current.grid[FacePositions.TOP_CENTER].complement = current.top.grid[
             FacePositions.BOTTOM_CENTER
         ]
-        face.grid[FacePositions.MID_LEFT].complement = face.left.grid[
-            FacePositions.MID_RIGHT
-        ]
-        face.grid[FacePositions.MID_RIGHT].complement = face.right.grid[
-            FacePositions.MID_LEFT
-        ]
-        face.grid[FacePositions.BOTTOM_CENTER].complement = face.bottom.grid[
+        current.top.grid[FacePositions.BOTTOM_CENTER].complement = current.grid[
             FacePositions.TOP_CENTER
         ]
 
-        ## Assigning complements for corner pieces
-        face.grid[FacePositions.TOP_LEFT].complements = (
-            face.top.grid[FacePositions.BOTTOM_LEFT],
-            face.left.grid[FacePositions.TOP_RIGHT],
+        current.grid[FacePositions.MID_LEFT].complement = current.left.grid[
+            FacePositions.MID_RIGHT
+        ]
+        current.left.grid[FacePositions.MID_RIGHT].complement = current.grid[
+            FacePositions.MID_LEFT
+        ]
+
+        current.grid[FacePositions.MID_RIGHT].complement = current.right.grid[
+            FacePositions.MID_LEFT
+        ]
+        current.right.grid[FacePositions.MID_LEFT].complement = current.grid[
+            FacePositions.MID_RIGHT
+        ]
+
+        current.grid[FacePositions.BOTTOM_CENTER].complement = current.bottom.grid[
+            FacePositions.TOP_CENTER
+        ]
+        current.bottom.grid[FacePositions.TOP_CENTER].complement = current.grid[
+            FacePositions.BOTTOM_CENTER
+        ]
+
+        current.top.grid[FacePositions.MID_LEFT].complement = current.left.grid[
+            FacePositions.TOP_CENTER
+        ]
+        current.left.grid[FacePositions.TOP_CENTER].complement = current.top.grid[
+            FacePositions.MID_LEFT
+        ]
+
+        current.top.grid[FacePositions.MID_RIGHT].complement = current.right.grid[
+            FacePositions.TOP_CENTER
+        ]
+        current.right.grid[FacePositions.TOP_CENTER].complement = current.top.grid[
+            FacePositions.MID_RIGHT
+        ]
+
+        current.bottom.grid[FacePositions.MID_LEFT].complement = current.left.grid[
+            FacePositions.BOTTOM_CENTER
+        ]
+        current.left.grid[FacePositions.BOTTOM_CENTER].complement = current.bottom.grid[
+            FacePositions.MID_LEFT
+        ]
+
+        current.bottom.grid[FacePositions.MID_RIGHT].complement = current.right.grid[
+            FacePositions.BOTTOM_CENTER
+        ]
+        current.right.grid[
+            FacePositions.BOTTOM_CENTER
+        ].complement = current.bottom.grid[FacePositions.MID_RIGHT]
+
+        current.opposite.grid[FacePositions.TOP_CENTER].complement = current.top.grid[
+            FacePositions.TOP_CENTER
+        ]
+        current.top.grid[FacePositions.TOP_CENTER].complement = current.opposite.grid[
+            FacePositions.TOP_CENTER
+        ]
+
+        current.opposite.grid[FacePositions.MID_LEFT].complement = current.right.grid[
+            FacePositions.MID_RIGHT
+        ]
+        current.right.grid[FacePositions.MID_RIGHT].complement = current.opposite.grid[
+            FacePositions.MID_LEFT
+        ]
+
+        current.opposite.grid[FacePositions.MID_RIGHT].complement = current.left.grid[
+            FacePositions.MID_LEFT
+        ]
+        current.left.grid[FacePositions.MID_LEFT].complement = current.opposite.grid[
+            FacePositions.MID_RIGHT
+        ]
+
+        current.opposite.grid[
+            FacePositions.BOTTOM_CENTER
+        ].complement = current.bottom.grid[FacePositions.BOTTOM_CENTER]
+        current.bottom.grid[
+            FacePositions.BOTTOM_CENTER
+        ].complement = current.opposite.grid[FacePositions.BOTTOM_CENTER]
+
+        # Assigning corner piece complements
+        # Front Corners
+        current.grid[FacePositions.TOP_LEFT].complements = set(
+            [
+                current.top.grid[FacePositions.BOTTOM_LEFT],
+                current.left.grid[FacePositions.TOP_RIGHT],
+            ]
         )
-        face.grid[FacePositions.TOP_RIGHT].complements = (
-            face.top.grid[FacePositions.BOTTOM_RIGHT],
-            face.right.grid[FacePositions.TOP_LEFT],
+        current.top.grid[FacePositions.BOTTOM_LEFT].complements = set(
+            [
+                current.grid[FacePositions.TOP_LEFT],
+                current.left.grid[FacePositions.TOP_RIGHT],
+            ]
         )
-        face.grid[FacePositions.BOTTOM_LEFT].complements = (
-            face.bottom.grid[FacePositions.TOP_LEFT],
-            face.left.grid[FacePositions.BOTTOM_RIGHT],
-        )
-        face.grid[FacePositions.BOTTOM_RIGHT].complements = (
-            face.bottom.grid[FacePositions.TOP_RIGHT],
-            face.right.grid[FacePositions.BOTTOM_LEFT],
+        current.left.grid[FacePositions.TOP_RIGHT].complements = set(
+            [
+                current.grid[FacePositions.TOP_LEFT],
+                current.top.grid[FacePositions.BOTTOM_LEFT],
+            ]
         )
 
+        current.grid[FacePositions.TOP_RIGHT].complements = set(
+            [
+                current.top.grid[FacePositions.BOTTOM_RIGHT],
+                current.right.grid[FacePositions.TOP_LEFT],
+            ]
+        )
+        current.top.grid[FacePositions.BOTTOM_RIGHT].complements = set(
+            [
+                current.grid[FacePositions.TOP_RIGHT],
+                current.right.grid[FacePositions.TOP_LEFT],
+            ]
+        )
+        current.right.grid[FacePositions.TOP_LEFT].complements = set(
+            [
+                current.top.grid[FacePositions.BOTTOM_RIGHT],
+                current.grid[FacePositions.TOP_RIGHT],
+            ]
+        )
+
+        current.grid[FacePositions.BOTTOM_LEFT].complements = set(
+            [
+                current.bottom.grid[FacePositions.TOP_LEFT],
+                current.left.grid[FacePositions.BOTTOM_RIGHT],
+            ]
+        )
+        current.bottom.grid[FacePositions.TOP_LEFT].complements = set(
+            [
+                current.grid[FacePositions.BOTTOM_LEFT],
+                current.left.grid[FacePositions.BOTTOM_RIGHT],
+            ]
+        )
+        current.left.grid[FacePositions.BOTTOM_RIGHT].complements = set(
+            [
+                current.grid[FacePositions.BOTTOM_LEFT],
+                current.bottom.grid[FacePositions.TOP_LEFT],
+            ]
+        )
+
+        current.grid[FacePositions.BOTTOM_RIGHT].complements = set(
+            [
+                current.bottom.grid[FacePositions.TOP_RIGHT],
+                current.right.grid[FacePositions.BOTTOM_LEFT],
+            ]
+        )
+        current.bottom.grid[FacePositions.TOP_RIGHT].complements = set(
+            [
+                current.grid[FacePositions.BOTTOM_RIGHT],
+                current.right.grid[FacePositions.BOTTOM_LEFT],
+            ]
+        )
+        current.right.grid[FacePositions.BOTTOM_LEFT].complements = set(
+            [
+                current.grid[FacePositions.BOTTOM_RIGHT],
+                current.bottom.grid[FacePositions.TOP_RIGHT],
+            ]
+        )
+
+        # Back Corners
+        current.opposite.grid[FacePositions.TOP_LEFT].complements = set(
+            [
+                current.top.grid[FacePositions.TOP_RIGHT],
+                current.right.grid[FacePositions.TOP_RIGHT],
+            ]
+        )
+        current.top.grid[FacePositions.TOP_RIGHT].complements = set(
+            [
+                current.opposite.grid[FacePositions.TOP_LEFT],
+                current.right.grid[FacePositions.TOP_RIGHT],
+            ]
+        )
+        current.right.grid[FacePositions.TOP_RIGHT].complements = set(
+            [
+                current.top.grid[FacePositions.TOP_RIGHT],
+                current.opposite.grid[FacePositions.TOP_LEFT],
+            ]
+        )
+
+        current.opposite.grid[FacePositions.TOP_RIGHT].complements = set(
+            [
+                current.top.grid[FacePositions.TOP_LEFT],
+                current.left.grid[FacePositions.TOP_LEFT],
+            ]
+        )
+        current.top.grid[FacePositions.TOP_LEFT].complements = set(
+            [
+                current.opposite.grid[FacePositions.TOP_RIGHT],
+                current.left.grid[FacePositions.TOP_LEFT],
+            ]
+        )
+        current.left.grid[FacePositions.TOP_LEFT].complements = set(
+            [
+                current.top.grid[FacePositions.TOP_LEFT],
+                current.opposite.grid[FacePositions.TOP_RIGHT],
+            ]
+        )
+
+        current.opposite.grid[FacePositions.BOTTOM_LEFT].complements = set(
+            [
+                current.bottom.grid[FacePositions.BOTTOM_RIGHT],
+                current.right.grid[FacePositions.BOTTOM_RIGHT],
+            ]
+        )
+        current.bottom.grid[FacePositions.BOTTOM_RIGHT].complements = set(
+            [
+                current.opposite.grid[FacePositions.BOTTOM_LEFT],
+                current.right.grid[FacePositions.BOTTOM_RIGHT],
+            ]
+        )
+        current.right.grid[FacePositions.BOTTOM_RIGHT].complements = set(
+            [
+                current.bottom.grid[FacePositions.BOTTOM_RIGHT],
+                current.opposite.grid[FacePositions.BOTTOM_LEFT],
+            ]
+        )
+
+        current.opposite.grid[FacePositions.BOTTOM_RIGHT].complements = set(
+            [
+                current.bottom.grid[FacePositions.BOTTOM_LEFT],
+                current.left.grid[FacePositions.BOTTOM_LEFT],
+            ]
+        )
+        current.bottom.grid[FacePositions.BOTTOM_LEFT].complements = set(
+            [
+                current.opposite.grid[FacePositions.BOTTOM_RIGHT],
+                current.left.grid[FacePositions.BOTTOM_LEFT],
+            ]
+        )
+        current.left.grid[FacePositions.BOTTOM_LEFT].complements = set(
+            [
+                current.bottom.grid[FacePositions.BOTTOM_LEFT],
+                current.opposite.grid[FacePositions.BOTTOM_RIGHT],
+            ]
+        )
+
+    def integrity_check(func: function) -> function:
+        """
+        This is a decorator method that performs checks the integrity of the cube after each operation.
+
+        Args:
+            func (function): Function to be executed within the wrapper function
+
+        Returns:
+            (function): Wrapper function that performs operation, followed by the integrity check
+        """
+
+        def wrapper(
+            self,
+            operation: Union[PossibleRotations, PossibleShifts],
+            internal_req: bool = False,
+        ) -> None:
+            """
+            This is the wrapper function for the decorator. It performs the operation, as well as the
+            integrity check after performing each operation.
+
+            Args:
+                operation (Union[PossibleRotations, PossibleShifts]): Operation requested
+                internal_req (bool, optional): Flag representing whether the operation was requested by
+                                               user or a built-in function. Defaults to False.
+
+            Raises:
+                CubeIntegrityError: If the requested operation causes a break in cube integrity, exception is raised
+            """
+            func(operation, internal_req)
+            if not CubeValidity.is_cube_valid(self):
+                raise CubeIntegrityError(
+                    f"Operation '{operation.value}' has broken integrity of the cube! Exiting Porgram Now!"
+                )
+
+        return wrapper
+
+    @integrity_check
     def rotate(self, rotation: PossibleRotations, internal_req: bool = False) -> None:
+        """
+        This method performs the requested rotation operation.
+
+        Args:
+            rotation (PossibleRotations): String literal indicating the rotation operation requested
+            internal_req (bool, optional): bool flag indicating whether the operation was requested by
+                                           user or a buit-in function. Defaults to False.
+
+        Raises:
+            InvalidOperationError: If requested operation is not a rotation, exception is raised.
+        """
         # YOUR CODE HERE
         for op, func in zip(POSSIBLE_ROTATIONS, ROTATIONS):
             if rotation == op:
@@ -236,7 +650,19 @@ class RubixCube:
         else:
             raise InvalidOperationError("Invalid Rotation Operation Requested!")
 
+    @integrity_check
     def shift(self, shift: PossibleShifts, internal_req: bool = None) -> None:
+        """
+        This method performs the requested shift operation.
+
+        Args:
+            shift (PossibleShifts): String literal indicating the shift operation requested
+            internal_req (bool, optional): bool flag indicating whether the operation was requested by
+                                           user or a buit-in function. Defaults to None.
+
+        Raises:
+            InvalidOperationError: If requested operation is not a shift, exception is raised
+        """
         # YOUR CODE HERE
         for op, func in zip(POSSIBLE_SHIFTS, SHIFTS):
             if shift == op:
@@ -248,12 +674,19 @@ class RubixCube:
             raise InvalidOperationError("Invalid Shift Operation Requested!")
 
     def reset_perspective(self) -> None:
+        """
+        This method resets the perspective of the cube to its initial orientation. Initial
+        orientation is reached when the blue face is in front, white face on top and
+        red face on the left.
+
+        Raises:
+            CubeIntegrityError: If the blue face doesn't have a valid orientation, raise an exception
+        """
         iters = 0
         while True:
             if CubePredicate.is_correct_perspective(self):
                 break
             else:
-                # orientation = Rotations.get_orientation(cube)
                 orientation = self.blue_face.orientation_to_cube
                 if orientation == Orientation.TOP:
                     self.rotate(PossibleRotations.ROTATE_DOWN, internal_req=True)
@@ -281,7 +714,7 @@ class RubixCube:
                     )
                 else:
                     if iters > 5:
-                        raise Exception("Invalid Cube! Exiting Infinite Loop")
+                        raise CubeIntegrityError("Invalid Cube! Exiting Infinite Loop")
                     else:
                         self.rotate(
                             PossibleRotations.ROTATE_LEFT_HORIZONTALLY,
@@ -289,8 +722,13 @@ class RubixCube:
                         )
                 iters += 1
 
-    def shuffle_cube(self) -> tuple[list, list]:
-        op_stack = []
+    def shuffle_cube(self) -> list[Union[PossibleRotations, PossibleShifts]]:
+        """
+        This method shuffles the cube by performing random operations.
+
+        Returns:
+            list[Union[PossibleRotations, PossibleShifts]]: _description_
+        """
         error_stack = []
         num_operations = np.random.randint(100, 200)
         for i in range(num_operations):
@@ -299,7 +737,7 @@ class RubixCube:
                 rand_idx = np.random.randint(len(ROTATIONS))
                 try:
                     ROTATIONS[rand_idx](self, internal_req=True)
-                    op_stack.append(POSSIBLE_ROTATIONS[rand_idx])
+                    # self.op_stack.append(POSSIBLE_ROTATIONS[rand_idx])
                 except:
                     # YOUR CODE HERE
                     error_stack.append(POSSIBLE_ROTATIONS[rand_idx])
@@ -308,21 +746,55 @@ class RubixCube:
                 rand_idx = np.random.randint(len(SHIFTS))
                 try:
                     SHIFTS[rand_idx](self, internal_req=True)
-                    op_stack.append(POSSIBLE_SHIFTS[rand_idx])
+                    # self.op_stack.append(POSSIBLE_SHIFTS[rand_idx])
                 except:
                     # YOUR CODE HERE
                     error_stack.append(POSSIBLE_SHIFTS[rand_idx])
                     continue
 
-        return op_stack, error_stack
+        return error_stack
+
+    def unshuffle_cube(self) -> None:
+        inverse_op_stack = hp.reverse_stack(self.op_stack)
+        for op in inverse_op_stack:
+            op()  # Add operation call with internal_req
+            pass
+        pass
 
 
 class Face:
+
+    """
+    This is a class representing a Face of a Rubix Cube (type=CubeType). Each face has a 3 X 3 grid
+    representing each of the 9 pieces (type=PieceType) on the face of a Rubix Cube. The Piece().colour
+    is set to the face's center colour (since the center piece cannot be moved from the face).
+
+    ATTRIBUTES:
+        _colour (str): Private string literal assigning a colour to the face's center piece
+        right (Face): Face instance that is to the right of the current face in the Cube class
+        left (Face): Face instance that is to the left of the current face in the Cube class
+        top (Face, optional): Face instance that is to the top of the current face in the Cube class. Becomes None if face is not a side face. Defaults to None
+        bottom (Face, optional): Face instance that is to the bottom of the current face in the Cube class. Becomes None if face is not a side face. Defaults to None
+        front (Face, optional): Face instance that is to the front of the current face in the Cube class. Becomes None if face is a side face. Defaults to None
+        back (Face, optional): Face instance that is to the back of the current face in the Cube class. Becomes None if face is a side face. Defaults to None
+        opposite (Face, optional): Face instance that points to the opposite face to the current face in the Cube class. Defaults to None
+        orientation_to_cube (Orientation, optional): Orientation of the face with respect to the cube's current perspective. Defaults to None
+        grid (numpy.array, optional): 3 X 3 matrix that stores the pieces for the current face. Defaults to None
+
+    METHODS:
+        copy: Creates a duplicate instance of the Face class with the same values
+        initialize_grid: Initializes the face instance's grid
+
+    PROPERTIES:
+        colour: Property to access face's colour
+        is_side_face: bool property indicating whether a face is a side face in the cube
+    """
+
     def __init__(
         self,
         colour: Colours,
-        left: Face = None,
-        right: Face = None,
+        left: Face,
+        right: Face,
         top: Face = None,
         bottom: Face = None,
         front: Face = None,
@@ -350,6 +822,12 @@ class Face:
         pass
 
     # YOUR CODE HERE
+    @property
+    def is_side_face(self) -> bool:
+        if self.orientation_to_cube in [Orientation.TOP, Orientation.BOTTOM]:
+            return False
+        return True
+
     @property
     def colour(self) -> Colours:
         return self._colour
@@ -403,6 +881,23 @@ class Face:
 
 
 class Piece:
+
+    """
+    This is a class that represents each piece on each face of the Rubix Cube.
+
+    ATTRIBUTES:
+        face_position (FacePositions): a tuple representing the index for the piece in the current face instance's grid
+        face (Face): a pointer to the piece's current face instance
+        _colour (Colour): a string property that stores the colour that is on the current piece instance
+        _piece_type (PieceType): a string property that stores the piece's type (Center, Edge, Corner)
+
+    PROPERTIES:
+        colour: Property to access the piece's colour
+        piece_type: Property to access the piece's type
+        position: Property to access the piece's absolute location in the cube
+
+    """
+
     def __init__(
         self, face: Face, face_position: FacePositions, piece_type: PieceType
     ) -> None:
@@ -421,8 +916,28 @@ class Piece:
     def piece_type(self) -> PieceType:
         return self._piece_type
 
+    @property
+    def position(self) -> tuple[Face, FacePositions]:
+        return (self.face, self.face_position)
+
 
 class EdgePiece(Piece):
+
+    """
+    This is a class that represents each edge piece on each face of the Rubix Cube. This class inherits from
+    the Piece class, inheriting some properties and attributes.
+
+    ATTRIBUTES:
+        face_position (FacePositions, inherited): a tuple representing the index for the piece in the current face instance's grid
+        face (Face, inherited): a pointer to the piece's current face instance
+        _colour (Colour, inherited): a string property that stores the colour that is on the current piece instance
+        _piece_type (PieceType, inherited): a string property that stores the piece's type (Center, Edge, Corner)
+        _complement (EdgePiece): a pointer property to the Piece instance that is the current Piece instance's complement
+
+    PROPERTIES:
+        complement: Property to access the piece's complement piece
+    """
+
     def __init__(
         self,
         face: Face,
@@ -445,17 +960,34 @@ class EdgePiece(Piece):
             self._complement = new_complement
         else:
             raise Exception(
-                "Complement attribute is already initialized. Cannot override initial value!"
+                "'complement' attribute is already initialized. Cannot override initial value!"
             )
 
 
 class CornerPiece(Piece):
+
+    """
+    This is a class that represents each corner piece on each face of the Rubix Cube. This class inherits from
+    the Piece class, inheriting some properties and attributes.
+
+    ATTRIBUTES:
+        face_position (FacePositions, inherited): a tuple representing the index for the piece in the current face instance's grid
+        face (Face, inherited): a pointer to the piece's current face instance
+        _colour (Colour, inherited): a string property that stores the colour that is on the current piece instance
+        _piece_type (PieceType, inherited): a string property that stores the piece's type (Center, Edge, Corner)
+        _complements (set[CornerPiece]): a tuple property containing pointers to the Piece instances that are the
+                              current Piece instance's complements
+
+    PROPERTIES:
+        complements: Property to access the piece's complement pieces
+    """
+
     def __init__(
         self,
         face: Face,
         face_position: FacePositions,
         piece_type: PieceType,
-        complements: Optional[tuple[CornerPiece, CornerPiece]] = None,
+        complements: Optional[set[CornerPiece]] = None,
     ) -> None:
         # YOUR CODE HERE
         super().__init__(face, face_position, piece_type)
@@ -463,11 +995,11 @@ class CornerPiece(Piece):
 
     # YOUR CODE HERE
     @property
-    def complements(self) -> tuple[CornerPiece, CornerPiece]:
+    def complements(self) -> set[CornerPiece]:
         return self._complements
 
     @complements.setter
-    def complements(self, new_complements) -> None:
+    def complements(self, new_complements: set[CornerPiece]) -> None:
         if self.complements is None:
             self._complements = new_complements
         else:

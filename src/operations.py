@@ -14,9 +14,6 @@ if TYPE_CHECKING:
 class Operation(Protocol):
     def verbose(func: function) -> function:
         ...
-        # def wrapper(cube: RubixCube)
-
-        # pass
 
 
 class Rotations:
@@ -28,10 +25,11 @@ class Rotations:
                 for op in POSSIBLE_ROTATIONS:
                     if op == cube.current_operation:
                         print(op.value)
+                        cube.op_stack.append(func)
                         break
                 else:
                     raise InvalidOperationError("Invalid Rotation Operation Requested!")
-            func(cube)
+            func(cube, internal_req)
             cube.current_operation = None
 
         return wrapper
@@ -428,14 +426,15 @@ class Shifts:
         def wrapper(cube: RubixCube, internal_req: bool = False):
             if not internal_req:
                 for op in POSSIBLE_SHIFTS:
-                    ic.ic(op)
-                    ic.ic(cube.current_operation)
+                    # ic.ic(op)
+                    # ic.ic(cube.current_operation)
                     if op == cube.current_operation:
                         print(op.value)
+                        cube.op_stack.append(func)
                         break
                 else:
                     raise InvalidOperationError("Invalid Shift Operation Requested!")
-            func(cube)
+            func(cube, internal_req)
             cube.current_operation = None
 
         return wrapper

@@ -1,8 +1,16 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cube_init_m import Face, RubixCube
+    from cube_init_m import Face, RubixCube, Piece, CornerPiece, EdgePiece
+
+
+class PiecePredicate:
+    def are_pieces_equal(
+        piece1: Union[Piece, CornerPiece, EdgePiece],
+        piece2: Union[Piece, CornerPiece, EdgePiece],
+    ) -> bool:
+        return piece1 == piece2
 
 
 class FacePredicate:

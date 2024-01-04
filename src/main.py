@@ -1,16 +1,16 @@
 from cube_init_m import RubixCube
-from constants import PossibleRotations, PossibleShifts
+from constants import FacePositions, PossibleRotations, PossibleShifts
 import icecream as ic
+from validity_check import CubeValidity
+from error import ShuffleError
 
 
-def main():
+def main() -> None:
     cube = RubixCube()
     print(cube)
-    # cube.rotate(PossibleRotations.ROTATE_DOWN)
-    # # print(cube)
-    # cube.rotate(PossibleRotations.ROTATE_LEFT_HORIZONTALLY)
-    # # print(cube)
-    # cube.rotate(PossibleRotations.ROTATE_LEFT_VERTICALLY)
+    # print(CubeValidity.are_edge_piece_complements_correct(cube))
+    # print(CubeValidity.are_corner_piece_complements_correct(cube))
+    # cube.rotate(PossibleRotations.ROTATE_DOWN) # # print(cube) # cube.rotate(PossibleRotations.ROTATE_LEFT_HORIZONTALLY) # # print(cube) # cube.rotate(PossibleRotations.ROTATE_LEFT_VERTICALLY)
     # # print(cube)
     # cube.rotate(PossibleRotations.ROTATE_UP)
     # # print(cube)
@@ -26,8 +26,13 @@ def main():
     # print(cube)
     # cube.shift(PossibleShifts.RIGHT_COL_UP)
     # print(cube)
-    op_stack, error_stack = cube.shuffle_cube()
-    # print(cube)
+    error_stack = cube.shuffle_cube()
+    if len(error_stack) > 0:
+        raise ShuffleError(
+            "One or more operations weren't successful! Shuffle operation failed!"
+        )
+    print(cube)
+    print(cube.current_perspective.grid[FacePositions.TOP_LEFT].position)
     # for i in range(63):
     #     cube.shift(PossibleShifts.BOTTOM_ROW_LEFT)
     #     cube.shift(PossibleShifts.LEFT_COL_DOWN)
@@ -40,9 +45,9 @@ def main():
     """
     # cube.shift(PossibleShifts.BOTTOM_ROW_LEFT)
     # cube.shift(PossibleShifts.RIGHT_COL_DOWN)
-    print(cube)
-    ic.ic(op_stack)
-    ic.ic(error_stack)
+    # print(cube)
+    # ic.ic(op_stack)
+    # ic.ic(error_stack)
 
 
 if __name__ == "__main__":

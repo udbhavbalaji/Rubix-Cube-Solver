@@ -619,6 +619,7 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
             Raises:
                 CubeIntegrityError: If the requested operation causes a break in cube integrity, exception is raised
             """
+            ic.ic(operation)
             func(operation, internal_req)
             if not CubeValidity.is_cube_valid(self):
                 raise CubeIntegrityError(
@@ -648,7 +649,9 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
                 func(self, internal_req)
                 break
         else:
-            raise InvalidOperationError("Invalid Rotation Operation Requested!")
+            raise InvalidOperationError(
+                f"Invalid Rotation Operation Requested! Requested Operation is {rotation}"
+            )
 
     @integrity_check
     def shift(self, shift: PossibleShifts, internal_req: bool = None) -> None:
@@ -697,11 +700,11 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
                         self.current_perspective, self.white_face
                     ):
                         self.rotate(
-                            PossibleRotations.INVERT_CUBE_VERTICALLY, internal_req=True
+                            PossibleRotations.INVERT_VERTICALLY, internal_req=True
                         )
                     else:
                         self.rotate(
-                            PossibleRotations.INVERT_CUBE_HORIZONTALLY,
+                            PossibleRotations.INVERT_HORIZONTALLY,
                             internal_req=True,
                         )
                 elif orientation == Orientation.LEFT:
@@ -754,6 +757,20 @@ Face    |3 6 9|3 6 9|7 4 1|3 6 9| Face
 
         return error_stack
 
+    def set_perspective(self, face: Face) -> None:
+        orientation = face.orientation_to_cube
+
+        if orientation == Orientation.BACK:
+            self.rotate(PossibleRotations.INVERT_VERTICALLY, internal_req=True)
+        elif orientation == Orientation.LEFT:
+            self.rotate(PossibleRotations.ROTATE_RIGHT_VERTICALLY, internal_req=True)
+        elif orientation == Orientation.RIGHT:
+            self.rotate(PossibleRotations.ROTATE_LEFT_VERTICALLY, internal_req=True)
+        elif orientation == Orientation.TOP:
+            self.rotate(PossibleRotations.ROTATE_DOWN, internal_req=True)
+        elif orientation == Orientation.BOTTOM:
+            self.rotate(PossibleRotations.ROTATE_UP, internal_req=True)
+
     def unshuffle_cube(self) -> None:
         inverse_op_stack = hp.reverse_stack(self.op_stack)
         for op in inverse_op_stack:
@@ -771,8 +788,8 @@ class Face:
 
     ATTRIBUTES:
         _colour (str): Private string literal assigning a colour to the face's center piece
-        right (Face): Face instance that is to the right of the current face in the Cube class
-        left (Face): Face instance that is to the left of the current face in the Cube class
+        right (Face, optional): Face instance that is to the right of the current face in the Cube class. Defaults to None.
+        left (Face, optional): Face instance that is to the left of the current face in the Cube class. Defaults to None.
         top (Face, optional): Face instance that is to the top of the current face in the Cube class. Becomes None if face is not a side face. Defaults to None
         bottom (Face, optional): Face instance that is to the bottom of the current face in the Cube class. Becomes None if face is not a side face. Defaults to None
         front (Face, optional): Face instance that is to the front of the current face in the Cube class. Becomes None if face is a side face. Defaults to None
@@ -793,8 +810,8 @@ class Face:
     def __init__(
         self,
         colour: Colours,
-        left: Face,
-        right: Face,
+        left: Face = None,
+        right: Face = None,
         top: Face = None,
         bottom: Face = None,
         front: Face = None,

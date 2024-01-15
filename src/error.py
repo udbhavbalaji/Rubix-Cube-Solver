@@ -12,3 +12,8 @@ class CubeIntegrityError(Exception):
 class ShuffleError(Exception):
     def __init__(self, msg: str) -> None:
         super().__init__(msg)
+
+
+class InvalidEdgePieceError(Exception):
+    def __init__(self, msg: str) -> None:
+        super().__init__(msg)

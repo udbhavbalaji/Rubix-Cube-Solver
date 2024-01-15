@@ -31,8 +31,12 @@ def main() -> None:
         raise ShuffleError(
             "One or more operations weren't successful! Shuffle operation failed!"
         )
+
     print(cube)
-    print(cube.current_perspective.grid[FacePositions.TOP_LEFT].position)
+    cube.reset_perspective()
+    print(cube)
+    # print(cube)
+    # print(cube.current_perspective.grid[FacePositions.TOP_LEFT].position)
     # for i in range(63):
     #     cube.shift(PossibleShifts.BOTTOM_ROW_LEFT)
     #     cube.shift(PossibleShifts.LEFT_COL_DOWN)
